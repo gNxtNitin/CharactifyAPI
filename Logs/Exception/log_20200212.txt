@@ -1,0 +1,14 @@
+Time: 12-02-2020 10:14:45 AM
+-----------------------------------------------------------
+Message: System.OverflowException: Array dimensions exceeded supported range.
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3676
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2647
+-----------------------------------------------------------
+
+Time: 12-02-2020 10:16:45 AM
+-----------------------------------------------------------
+Message: System.OverflowException: Array dimensions exceeded supported range.
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3676
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2647
+-----------------------------------------------------------
+

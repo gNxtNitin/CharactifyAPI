@@ -1,0 +1,36 @@
+Time: 29-01-2020 02:36:33 PM
+-----------------------------------------------------------
+Message: System.TypeLoadException: Could not load type 'System.Web.HttpContext' from assembly 'System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.
+   at NReco.VideoConverter.FFMpegConverter..ctor()
+   at MediaServer.Media.mp4convert() in C:\Ravi\CharactifyAPI\MediaServer\Media.cs:line 13
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3675
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2641
+-----------------------------------------------------------
+
+Time: 29-01-2020 02:37:54 PM
+-----------------------------------------------------------
+Message: System.TypeLoadException: Could not load type 'System.Web.HttpContext' from assembly 'System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.
+   at NReco.VideoConverter.FFMpegConverter..ctor()
+   at MediaServer.Media.mp4convert() in C:\Ravi\CharactifyAPI\MediaServer\Media.cs:line 13
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3675
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2641
+-----------------------------------------------------------
+
+Time: 29-01-2020 02:52:08 PM
+-----------------------------------------------------------
+Message: System.TypeLoadException: Could not load type 'System.Web.HttpContext' from assembly 'System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.
+   at NReco.VideoConverter.FFMpegConverter..ctor()
+   at MediaServer.Media.mp4convert() in C:\Ravi\CharactifyAPI\MediaServer\Media.cs:line 13
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3676
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2641
+-----------------------------------------------------------
+
+Time: 29-01-2020 03:16:07 PM
+-----------------------------------------------------------
+Message: System.TypeLoadException: Could not load type 'System.Web.HttpContext' from assembly 'System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.
+   at NReco.VideoConverter.FFMpegConverter..ctor()
+   at MediaServer.Media.mp4convert() in C:\Ravi\CharactifyAPI\MediaServer\Media.cs:line 13
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3676
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2641
+-----------------------------------------------------------
+

@@ -1,0 +1,14 @@
+C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\bin\Release\netcoreapp2.1\Charactify.API.deps.json
+C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\bin\Release\netcoreapp2.1\Charactify.API.runtimeconfig.json
+C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\bin\Release\netcoreapp2.1\Charactify.API.runtimeconfig.dev.json
+C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\bin\Release\netcoreapp2.1\Charactify.API.dll
+C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\bin\Release\netcoreapp2.1\Charactify.API.pdb
+C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\obj\Release\netcoreapp2.1\Charactify.API.csprojAssemblyReference.cache
+C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\obj\Release\netcoreapp2.1\Charactify.API.csproj.CoreCompileInputs.cache
+C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\obj\Release\netcoreapp2.1\Charactify.API.RazorAssemblyInfo.cache
+C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\obj\Release\netcoreapp2.1\Charactify.API.RazorAssemblyInfo.cs
+C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\obj\Release\netcoreapp2.1\Charactify.API.AssemblyInfoInputs.cache
+C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\obj\Release\netcoreapp2.1\Charactify.API.AssemblyInfo.cs
+C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\obj\Release\netcoreapp2.1\Charactify.API.RazorTargetAssemblyInfo.cache
+C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\obj\Release\netcoreapp2.1\Charactify.API.dll
+C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\obj\Release\netcoreapp2.1\Charactify.API.pdb

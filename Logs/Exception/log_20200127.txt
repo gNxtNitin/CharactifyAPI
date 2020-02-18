@@ -1,0 +1,26 @@
+Time: 27-01-2020 11:06:00 AM
+-----------------------------------------------------------
+Message: System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3605
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2638
+-----------------------------------------------------------
+
+Time: 27-01-2020 11:14:05 AM
+-----------------------------------------------------------
+Message: System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3605
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2638
+-----------------------------------------------------------
+
+Time: 27-01-2020 04:01:54 PM
+-----------------------------------------------------------
+Message: System.TypeLoadException: Could not load type 'System.Web.HttpContext' from assembly 'System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.
+   at NReco.VideoConverter.FFMpegConverter..ctor()
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3620
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2639
+-----------------------------------------------------------
+

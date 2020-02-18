@@ -1,0 +1,5 @@
+Time: 26-12-2019 04:13:39 PM
+-----------------------------------------------------------
+Message: {"UserId":71,"Categorycode":0,"FamilyStaus":false,"FriendsStaus":false,"CoWorkersStaus":false,"AcquaintancesStaus":false,"AllCategory":false}
+-----------------------------------------------------------
+

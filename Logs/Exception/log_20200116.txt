@@ -1,0 +1,28 @@
+Time: 16-01-2020 02:25:14 PM
+-----------------------------------------------------------
+Message: System.FormatException: The specified string is not in the form required for an e-mail address.
+   at System.Net.Mail.MailAddressParser.ReadCfwsAndThrowIfIncomplete(String data, Int32 index)
+   at System.Net.Mail.MailAddressParser.ParseDomain(String data, Int32& index)
+   at System.Net.Mail.MailAddressParser.ParseAddress(String data, Boolean expectMultipleAddresses, Int32& index)
+   at System.Net.Mail.MailAddressParser.ParseMultipleAddresses(String data)
+   at System.Net.Mail.MailAddressCollection.ParseValue(String addresses)
+   at System.Net.Mail.MailAddressCollection.Add(String addresses)
+   at Charactify.API.Services.CServices.Invite(List`1 Invreq, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 997
+-----------------------------------------------------------
+
+Time: 16-01-2020 03:23:18 PM
+-----------------------------------------------------------
+Message: System.ArgumentException: Column 'FirstName' does not belong to table Table1.
+   at System.Data.DataRow.GetDataColumn(String columnName)
+   at System.Data.DataRow.get_Item(String columnName)
+   at Charactify.API.Services.CServices.GetFeedList(GetFeedList obj, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3285
+-----------------------------------------------------------
+
+Time: 16-01-2020 03:23:31 PM
+-----------------------------------------------------------
+Message: System.ArgumentException: Column 'FirstName' does not belong to table Table1.
+   at System.Data.DataRow.GetDataColumn(String columnName)
+   at System.Data.DataRow.get_Item(String columnName)
+   at Charactify.API.Services.CServices.GetFeedList(GetFeedList obj, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3285
+-----------------------------------------------------------
+

@@ -1,0 +1,32 @@
+Time: 31-01-2020 12:17:02 PM
+-----------------------------------------------------------
+Message: System.FormatException: String '02/28/1993' was not recognized as a valid DateTime.
+   at System.DateTimeParse.Parse(ReadOnlySpan`1 s, DateTimeFormatInfo dtfi, DateTimeStyles styles)
+   at System.Convert.ToDateTime(String value)
+   at Charactify.API.Services.CServices.ProfileUpdate(UserDetailsRequest users, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 702
+-----------------------------------------------------------
+
+Time: 31-01-2020 12:18:57 PM
+-----------------------------------------------------------
+Message: System.FormatException: String '02/28/1993' was not recognized as a valid DateTime.
+   at System.DateTimeParse.Parse(ReadOnlySpan`1 s, DateTimeFormatInfo dtfi, DateTimeStyles styles)
+   at System.Convert.ToDateTime(String value)
+   at Charactify.API.Services.CServices.ProfileUpdate(UserDetailsRequest users, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 702
+-----------------------------------------------------------
+
+Time: 31-01-2020 12:30:14 PM
+-----------------------------------------------------------
+Message: System.FormatException: String '02/28/1993' was not recognized as a valid DateTime.
+   at System.DateTimeParse.Parse(ReadOnlySpan`1 s, DateTimeFormatInfo dtfi, DateTimeStyles styles)
+   at System.Convert.ToDateTime(String value)
+   at Charactify.API.Services.CServices.ProfileUpdate(UserDetailsRequest users, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 702
+-----------------------------------------------------------
+
+Time: 31-01-2020 12:31:53 PM
+-----------------------------------------------------------
+Message: System.FormatException: String '02/28/1993' was not recognized as a valid DateTime.
+   at System.DateTimeParse.Parse(ReadOnlySpan`1 s, DateTimeFormatInfo dtfi, DateTimeStyles styles)
+   at System.Convert.ToDateTime(String value)
+   at Charactify.API.Services.CServices.ProfileUpdate(UserDetailsRequest users, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 702
+-----------------------------------------------------------
+

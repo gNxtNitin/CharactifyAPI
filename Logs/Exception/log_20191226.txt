@@ -1,0 +1,24 @@
+Time: 26-12-2019 02:43:17 PM
+-----------------------------------------------------------
+Message: System.FormatException: String was not recognized as a valid Boolean.
+   at System.Boolean.Parse(ReadOnlySpan`1 value)
+   at System.Boolean.Parse(String value)
+   at Charactify.API.Services.CServices.GetScore(ScoreRequest objScore) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 1675
+-----------------------------------------------------------
+
+Time: 26-12-2019 02:47:34 PM
+-----------------------------------------------------------
+Message: System.FormatException: String was not recognized as a valid Boolean.
+   at System.Boolean.Parse(ReadOnlySpan`1 value)
+   at System.Boolean.Parse(String value)
+   at Charactify.API.Services.CServices.GetScore(ScoreRequest objScore)
+-----------------------------------------------------------
+
+Time: 26-12-2019 02:49:40 PM
+-----------------------------------------------------------
+Message: System.FormatException: String was not recognized as a valid Boolean.
+   at System.Boolean.Parse(ReadOnlySpan`1 value)
+   at System.Boolean.Parse(String value)
+   at Charactify.API.Services.CServices.GetScore(ScoreRequest objScore)
+-----------------------------------------------------------
+

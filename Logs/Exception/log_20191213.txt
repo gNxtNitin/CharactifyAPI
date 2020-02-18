@@ -1,0 +1,80 @@
+Time: 13-12-2019 02:38:45 PM
+-----------------------------------------------------------
+Message: System.InvalidOperationException: The ConnectionString property has not been initialized.
+   at System.Data.SqlClient.SqlConnection.PermissionDemand()
+   at System.Data.SqlClient.SqlConnectionFactory.PermissionDemand(DbConnection outerConnection)
+   at System.Data.ProviderBase.DbConnectionInternal.TryOpenConnectionInternal(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+   at System.Data.ProviderBase.DbConnectionClosed.TryOpenConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+   at System.Data.SqlClient.SqlConnection.TryOpen(TaskCompletionSource`1 retry)
+   at System.Data.SqlClient.SqlConnection.Open()
+   at Charactify.API.Shared.SP.RunStoredProcedure(String dbConnStr, DataSet ds, String spName, ArrayList spPramArrList) in C:\Ravi\CharactifyAPI\Charactify.API\Shared\SP.cs:line 61
+   at Charactify.API.Services.CServices.GetSpecificFeedResponse(GetFeedList Obj) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 4283
+-----------------------------------------------------------
+
+Time: 13-12-2019 02:38:46 PM
+-----------------------------------------------------------
+Message: System.InvalidOperationException: The ConnectionString property has not been initialized.
+   at Charactify.API.Services.CServices.GetSpecificFeedResponse(GetFeedList Obj) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 4379
+   at Charactify.API.Services.CServices.AddReactions(FeedReactionRequest objaf) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2797
+-----------------------------------------------------------
+
+Time: 13-12-2019 02:39:22 PM
+-----------------------------------------------------------
+Message: System.InvalidOperationException: The ConnectionString property has not been initialized.
+   at System.Data.SqlClient.SqlConnection.PermissionDemand()
+   at System.Data.SqlClient.SqlConnectionFactory.PermissionDemand(DbConnection outerConnection)
+   at System.Data.ProviderBase.DbConnectionInternal.TryOpenConnectionInternal(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+   at System.Data.ProviderBase.DbConnectionClosed.TryOpenConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+   at System.Data.SqlClient.SqlConnection.TryOpen(TaskCompletionSource`1 retry)
+   at System.Data.SqlClient.SqlConnection.Open()
+   at Charactify.API.Shared.SP.RunStoredProcedure(String dbConnStr, DataSet ds, String spName, ArrayList spPramArrList) in C:\Ravi\CharactifyAPI\Charactify.API\Shared\SP.cs:line 61
+   at Charactify.API.Services.CServices.GetSpecificFeedResponse(GetFeedList Obj) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 4283
+-----------------------------------------------------------
+
+Time: 13-12-2019 02:39:29 PM
+-----------------------------------------------------------
+Message: System.InvalidOperationException: The ConnectionString property has not been initialized.
+   at Charactify.API.Services.CServices.GetSpecificFeedResponse(GetFeedList Obj) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 4379
+   at Charactify.API.Services.CServices.AddReactions(FeedReactionRequest objaf) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2797
+-----------------------------------------------------------
+
+Time: 13-12-2019 02:39:56 PM
+-----------------------------------------------------------
+Message: System.InvalidOperationException: The ConnectionString property has not been initialized.
+   at System.Data.SqlClient.SqlConnection.PermissionDemand()
+   at System.Data.SqlClient.SqlConnectionFactory.PermissionDemand(DbConnection outerConnection)
+   at System.Data.ProviderBase.DbConnectionInternal.TryOpenConnectionInternal(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+   at System.Data.ProviderBase.DbConnectionClosed.TryOpenConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+   at System.Data.SqlClient.SqlConnection.TryOpen(TaskCompletionSource`1 retry)
+   at System.Data.SqlClient.SqlConnection.Open()
+   at Charactify.API.Shared.SP.RunStoredProcedure(String dbConnStr, DataSet ds, String spName, ArrayList spPramArrList) in C:\Ravi\CharactifyAPI\Charactify.API\Shared\SP.cs:line 61
+   at Charactify.API.Services.CServices.GetSpecificFeedResponse(GetFeedList Obj) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 4283
+-----------------------------------------------------------
+
+Time: 13-12-2019 02:41:52 PM
+-----------------------------------------------------------
+Message: System.InvalidOperationException: The ConnectionString property has not been initialized.
+   at Charactify.API.Services.CServices.GetSpecificFeedResponse(GetFeedList Obj) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 4379
+   at Charactify.API.Services.CServices.AddReactions(FeedReactionRequest objaf) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2797
+-----------------------------------------------------------
+
+Time: 13-12-2019 02:42:10 PM
+-----------------------------------------------------------
+Message: System.InvalidOperationException: The ConnectionString property has not been initialized.
+   at System.Data.SqlClient.SqlConnection.PermissionDemand()
+   at System.Data.SqlClient.SqlConnectionFactory.PermissionDemand(DbConnection outerConnection)
+   at System.Data.ProviderBase.DbConnectionInternal.TryOpenConnectionInternal(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+   at System.Data.ProviderBase.DbConnectionClosed.TryOpenConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+   at System.Data.SqlClient.SqlConnection.TryOpen(TaskCompletionSource`1 retry)
+   at System.Data.SqlClient.SqlConnection.Open()
+   at Charactify.API.Shared.SP.RunStoredProcedure(String dbConnStr, DataSet ds, String spName, ArrayList spPramArrList) in C:\Ravi\CharactifyAPI\Charactify.API\Shared\SP.cs:line 61
+   at Charactify.API.Services.CServices.GetSpecificFeedResponse(GetFeedList Obj) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 4283
+-----------------------------------------------------------
+
+Time: 13-12-2019 02:42:27 PM
+-----------------------------------------------------------
+Message: System.InvalidOperationException: The ConnectionString property has not been initialized.
+   at Charactify.API.Services.CServices.GetSpecificFeedResponse(GetFeedList Obj) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 4379
+   at Charactify.API.Services.CServices.AddReactions(FeedReactionRequest objaf) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2797
+-----------------------------------------------------------
+

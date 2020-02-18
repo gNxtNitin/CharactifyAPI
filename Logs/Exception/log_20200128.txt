@@ -1,0 +1,176 @@
+Time: 28-01-2020 12:53:00 PM
+-----------------------------------------------------------
+Message: System.IO.FileNotFoundException: Could not find file 'C:\Ravi\CharactifyAPI\Charactify.API\media-server\71_990_28-01-2020_12_50_531.MP4'.
+File name: 'C:\Ravi\CharactifyAPI\Charactify.API\media-server\71_990_28-01-2020_12_50_531.MP4'
+   at System.IO.FileInfo.get_Length()
+   at Charactify.API.Services.CServices.ReturnVideo(String fileName)
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat)
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId)
+-----------------------------------------------------------
+
+Time: 28-01-2020 01:44:18 PM
+-----------------------------------------------------------
+Message: System.IO.FileNotFoundException: Could not find file 'C:\Ravi\CharactifyAPI\Charactify.API\media-server\Upload\71_992_28-01-2020_12_59_111.MP4'.
+File name: 'C:\Ravi\CharactifyAPI\Charactify.API\media-server\Upload\71_992_28-01-2020_12_59_111.MP4'
+   at System.IO.FileInfo.get_Length()
+   at Charactify.API.Services.CServices.ReturnVideo(String fileName) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3760
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3702
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2641
+-----------------------------------------------------------
+
+Time: 28-01-2020 01:56:43 PM
+-----------------------------------------------------------
+Message: System.IO.FileNotFoundException: Could not find file 'C:\Ravi\CharactifyAPI\Charactify.API\media-server\Upload\71_993_28-01-2020_13_45_001.MP4'.
+File name: 'C:\Ravi\CharactifyAPI\Charactify.API\media-server\Upload\71_993_28-01-2020_13_45_001.MP4'
+   at System.IO.FileInfo.get_Length()
+   at Charactify.API.Services.CServices.ReturnVideo(String fileName)
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat)
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId)
+-----------------------------------------------------------
+
+Time: 28-01-2020 01:57:33 PM
+-----------------------------------------------------------
+Message: System.ComponentModel.Win32Exception (2): The system cannot find the file specified
+   at System.Diagnostics.Process.StartWithCreateProcess(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at Charactify.API.Services.CServices.ConvertNow(String cmd)
+   at Charactify.API.Services.CServices.ReturnVideo(String fileName)
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat)
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId)
+-----------------------------------------------------------
+
+Time: 28-01-2020 01:59:19 PM
+-----------------------------------------------------------
+Message: System.ComponentModel.Win32Exception (2): The system cannot find the file specified
+   at System.Diagnostics.Process.StartWithCreateProcess(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at Charactify.API.Services.CServices.ConvertNow(String cmd)
+   at Charactify.API.Services.CServices.ReturnVideo(String fileName)
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat)
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId)
+-----------------------------------------------------------
+
+Time: 28-01-2020 01:59:54 PM
+-----------------------------------------------------------
+Message: System.ComponentModel.Win32Exception (2): The system cannot find the file specified
+   at System.Diagnostics.Process.StartWithCreateProcess(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at Charactify.API.Services.CServices.ConvertNow(String cmd)
+   at Charactify.API.Services.CServices.ReturnVideo(String fileName)
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat)
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId)
+-----------------------------------------------------------
+
+Time: 28-01-2020 02:33:17 PM
+-----------------------------------------------------------
+Message: System.ComponentModel.Win32Exception (2): The system cannot find the file specified
+   at System.Diagnostics.Process.StartWithCreateProcess(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at Charactify.API.Services.CServices.ConvertNow(String cmd)
+   at Charactify.API.Services.CServices.ReturnVideo(String fileName)
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat)
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId)
+-----------------------------------------------------------
+
+Time: 28-01-2020 03:18:33 PM
+-----------------------------------------------------------
+Message: System.ComponentModel.Win32Exception (2): The system cannot find the file specified
+   at System.Diagnostics.Process.StartWithCreateProcess(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at Charactify.API.Services.CServices.ConvertNow(String cmd)
+   at Charactify.API.Services.CServices.ReturnVideo(String fileName)
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat)
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId)
+-----------------------------------------------------------
+
+Time: 28-01-2020 03:19:56 PM
+-----------------------------------------------------------
+Message: System.ComponentModel.Win32Exception (2): The system cannot find the file specified
+   at System.Diagnostics.Process.StartWithCreateProcess(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at Charactify.API.Services.CServices.ConvertNow(String cmd)
+   at Charactify.API.Services.CServices.ReturnVideo(String fileName)
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat)
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId)
+-----------------------------------------------------------
+
+Time: 28-01-2020 03:31:51 PM
+-----------------------------------------------------------
+Message: System.ComponentModel.Win32Exception (2): The system cannot find the file specified
+   at System.Diagnostics.Process.StartWithCreateProcess(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at Charactify.API.Services.CServices.ConvertNow(String cmd)
+   at Charactify.API.Services.CServices.ReturnVideo(String fileName)
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat)
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId)
+-----------------------------------------------------------
+
+Time: 28-01-2020 03:33:25 PM
+-----------------------------------------------------------
+Message: System.ComponentModel.Win32Exception (2): The system cannot find the file specified
+   at System.Diagnostics.Process.StartWithCreateProcess(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at Charactify.API.Services.CServices.ConvertNow(String cmd)
+   at Charactify.API.Services.CServices.ReturnVideo(String fileName)
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat)
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId)
+-----------------------------------------------------------
+
+Time: 28-01-2020 03:54:05 PM
+-----------------------------------------------------------
+Message: System.ComponentModel.Win32Exception (2): The system cannot find the file specified
+   at System.Diagnostics.Process.StartWithCreateProcess(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at Charactify.API.Services.CServices.ConvertNow(String cmd)
+   at Charactify.API.Services.CServices.ReturnVideo(String fileName)
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat)
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId)
+-----------------------------------------------------------
+
+Time: 28-01-2020 04:24:00 PM
+-----------------------------------------------------------
+Message: System.ComponentModel.Win32Exception (2): The system cannot find the file specified
+   at System.Diagnostics.Process.StartWithCreateProcess(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at Charactify.API.Services.CServices.ConvertNow(String cmd) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3800
+   at Charactify.API.Services.CServices.ReturnVideo(String fileName) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3778
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3711
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2641
+-----------------------------------------------------------
+
+Time: 28-01-2020 05:38:00 PM
+-----------------------------------------------------------
+Message: System.IO.FileNotFoundException: Could not find file 'C:\Ravi\CharactifyAPI\Charactify.API\media-server\Upload\2274_2373_1_21_2020_10_00_22_AM.3gp'.
+File name: 'C:\Ravi\CharactifyAPI\Charactify.API\media-server\Upload\2274_2373_1_21_2020_10_00_22_AM.3gp'
+   at System.IO.FileStream.ValidateFileHandle(SafeFileHandle fileHandle)
+   at System.IO.FileStream.CreateFileOpenHandle(FileMode mode, FileShare share, FileOptions options)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access)
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3692
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2641
+-----------------------------------------------------------
+
+Time: 28-01-2020 05:40:47 PM
+-----------------------------------------------------------
+Message: System.IO.FileNotFoundException: Could not find file 'C:\Ravi\CharactifyAPI\Charactify.API\media-server\Upload\2274_2373_1_21_2020_10_00_22_AM.3gp'.
+File name: 'C:\Ravi\CharactifyAPI\Charactify.API\media-server\Upload\2274_2373_1_21_2020_10_00_22_AM.3gp'
+   at System.IO.FileStream.ValidateFileHandle(SafeFileHandle fileHandle)
+   at System.IO.FileStream.CreateFileOpenHandle(FileMode mode, FileShare share, FileOptions options)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access)
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3692
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2641
+-----------------------------------------------------------
+
+Time: 28-01-2020 05:42:05 PM
+-----------------------------------------------------------
+Message: System.IO.FileNotFoundException: Could not find file 'C:\Ravi\CharactifyAPI\Charactify.API\media-server\Upload\2274_2373_1_21_2020_10_00_22_AM.3gp'.
+File name: 'C:\Ravi\CharactifyAPI\Charactify.API\media-server\Upload\2274_2373_1_21_2020_10_00_22_AM.3gp'
+   at System.IO.FileStream.ValidateFileHandle(SafeFileHandle fileHandle)
+   at System.IO.FileStream.CreateFileOpenHandle(FileMode mode, FileShare share, FileOptions options)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access)
+   at Charactify.API.Services.CServices.ConvertToVideoFornode(String data, Int32 userid, Int32 Feedid, String Fileformat) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 3692
+   at Charactify.API.Services.CServices.AddFeed(FeedRequest objaf, String currentUserId) in C:\Ravi\CharactifyAPI\Charactify.API\Services\CServices.Users.cs:line 2641
+-----------------------------------------------------------
+
