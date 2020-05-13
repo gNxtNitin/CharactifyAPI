@@ -18,6 +18,11 @@ namespace Charactify.API.Shared
     }
 
 
+    public class VerifyEmailOrPhone
+    {
+         public int Userid { get; set; }
+        public string Type { get; set; }
+    }
     public class GetVideo
     {
         string Url { get; set; }

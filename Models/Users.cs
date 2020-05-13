@@ -41,7 +41,8 @@ namespace Charactify.API.Models
         public Boolean Isselfrated { get; set; }
         public string type { get; set; }
         public string UniqueId { get; set; }
-
+        public Boolean Phoneverify { get; set; }
+        public Boolean Emailverify { get; set; }
         public string AppUserName { get; set; }
     }
     public class UserDetails

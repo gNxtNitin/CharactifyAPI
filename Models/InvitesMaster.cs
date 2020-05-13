@@ -10,7 +10,7 @@ namespace Charactify.API.Models
         public string InviteVia { get; set; }
         public string InviteViaId { get; set; }
         public string InvitedName { get; set; }
-        public int? InvitedPhone { get; set; }
+        public string InvitedPhone { get; set; }
         public string InvitedEmailId { get; set; }
         public DateTime InviteSentDate { get; set; }
         public int? InviteReSent { get; set; }

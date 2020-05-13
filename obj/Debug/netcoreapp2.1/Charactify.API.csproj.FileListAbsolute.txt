@@ -12,12 +12,6 @@ C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\obj\Debug\netcore
 C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.dll
 C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.pdb
 C:\Users\AshishKumar\Source\Repos\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.csprojAssemblyReference.cache
-C:\Ravi\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.csprojAssemblyReference.cache
-C:\Ravi\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.csproj.CoreCompileInputs.cache
-C:\Ravi\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.RazorAssemblyInfo.cache
-C:\Ravi\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.RazorAssemblyInfo.cs
-C:\Ravi\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.AssemblyInfoInputs.cache
-C:\Ravi\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.AssemblyInfo.cs
 C:\Ravi\CharactifyAPI\Charactify.API\bin\Debug\netcoreapp2.1\avcodec-57.dll
 C:\Ravi\CharactifyAPI\Charactify.API\bin\Debug\netcoreapp2.1\avdevice-57.dll
 C:\Ravi\CharactifyAPI\Charactify.API\bin\Debug\netcoreapp2.1\avfilter-6.dll
@@ -32,6 +26,12 @@ C:\Ravi\CharactifyAPI\Charactify.API\bin\Debug\netcoreapp2.1\Charactify.API.runt
 C:\Ravi\CharactifyAPI\Charactify.API\bin\Debug\netcoreapp2.1\Charactify.API.runtimeconfig.dev.json
 C:\Ravi\CharactifyAPI\Charactify.API\bin\Debug\netcoreapp2.1\Charactify.API.dll
 C:\Ravi\CharactifyAPI\Charactify.API\bin\Debug\netcoreapp2.1\Charactify.API.pdb
+C:\Ravi\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.csprojAssemblyReference.cache
+C:\Ravi\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.csproj.CoreCompileInputs.cache
+C:\Ravi\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.RazorAssemblyInfo.cache
+C:\Ravi\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.RazorAssemblyInfo.cs
+C:\Ravi\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.AssemblyInfoInputs.cache
+C:\Ravi\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.AssemblyInfo.cs
 C:\Ravi\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.RazorTargetAssemblyInfo.cache
 C:\Ravi\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.dll
 C:\Ravi\CharactifyAPI\Charactify.API\obj\Debug\netcoreapp2.1\Charactify.API.pdb

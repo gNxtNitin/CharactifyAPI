@@ -40,6 +40,7 @@ namespace Charactify.API.Shared
     {
         public string emailid { get; set; }
         public string name { get; set; }
+        public string Phone { get; set; }
     }
     //public class RootObject
     //{

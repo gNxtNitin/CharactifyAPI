@@ -44,6 +44,8 @@ namespace Charactify.API.Models
         public string AppUserName { get; set; }
         public string Type { get; set; }
         public bool? IslogOff { get; set; }
+        public bool? VerifiedPhone { get; set; }
+        public bool? VerifiedEmail { get; set; }
 
         public UserPrivacyDetails UserPrivacyDetails { get; set; }
         public ICollection<ShareMaster> ShareMaster { get; set; }

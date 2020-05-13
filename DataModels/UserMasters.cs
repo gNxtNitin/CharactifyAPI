@@ -37,5 +37,7 @@ namespace Charactify.API.DataModels
         public string VerificationCode { get; set; }
         public string UniqueId { get; set; }
         public string AppUserName { get; set; }
+        public bool VerifiedPhone { get; set; }
+        public bool VerifiedEmail { get; set; }
     }
 }

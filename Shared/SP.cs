@@ -116,6 +116,7 @@ namespace Charactify.API.Shared
             SqlCommand cmd = new SqlCommand();
             cmd = ArrangeParamter(spPramArrList);
             cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandTimeout = 0;
             cmd.Connection = conn;
             cmd.CommandText = spName;
             //cmd.ExecuteNonQuery();

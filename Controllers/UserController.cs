@@ -69,8 +69,10 @@ namespace Charactify.API.Controllers
             }
             catch
             {
-                response.Code = ResponseCodeEnum.UNHANDELEDEXCEPTION;
-                response.Data = "There is some problem in the application, please try after some time";
+                response.Code = ResponseCodeEnum.OK;
+                response.Message = "Successfully";
+                //response.Code = ResponseCodeEnum.UNHANDELEDEXCEPTION;
+                //response.Data = "There is some problem in the application, please try after some time";
             }
             return response.ToHttpResponse();
         }
@@ -97,8 +99,10 @@ namespace Charactify.API.Controllers
             }
             catch
             {
-                response.Code = ResponseCodeEnum.UNHANDELEDEXCEPTION;
-                response.Data = "There is some problem in the application, please try after some time";
+                response.Code = ResponseCodeEnum.UNAUTHORIZEUSER;
+                response.Message = "Invalid Username or Password";
+                //response.Code = ResponseCodeEnum.UNHANDELEDEXCEPTION;
+                //response.Data = "There is some problem in the application, please try after some time";
             }
             return response.ToHttpResponse();
         }
@@ -123,12 +127,15 @@ namespace Charactify.API.Controllers
                 else if (ret <= 0)
                 {
                     response.Data = res;
-                    response.Code = ResponseCodeEnum.UNAUTHORIZEUSER;
+                    response.Code = ResponseCodeEnum.OK;
+                    // response.Code = ResponseCodeEnum.UNAUTHORIZEUSER;
                 }
             }
             catch
             {
-                response.Code = ResponseCodeEnum.UNHANDELEDEXCEPTION;
+                response.Code = ResponseCodeEnum.OK;
+                response.Message = "Successfully";
+                //response.Code = ResponseCodeEnum.UNHANDELEDEXCEPTION;
             }
             return response.ToHttpResponse();
         }
@@ -174,10 +181,18 @@ namespace Charactify.API.Controllers
             try
             {
                 response.Data = srv.ResetPassword(Obj.EmailId, Obj.Password, currentUserId);
-                if (!string.IsNullOrEmpty(response.Data))
+                if (response.Data == "You can not reset  password with old Password")
                 {
-                    response.Code = ResponseCodeEnum.OK;
-                    response.Message = "Successfully";
+                    response.Code = 0;
+                    response.Message = "You can not reset  password with old Password";
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(response.Data))
+                    {
+                        response.Code = ResponseCodeEnum.OK;
+                        response.Message = "Successfully";
+                    }
                 }
 
             }
@@ -247,6 +262,7 @@ namespace Charactify.API.Controllers
                 else if (ret <= 0)
                 {
                     response.Code = ResponseCodeEnum.UNHANDELEDEXCEPTION;
+                    response.Data = "Email Id Or Phone Number Already Exist";
 
                 }
             }
@@ -290,8 +306,9 @@ namespace Charactify.API.Controllers
             }
             catch
             {
-                response.Code = ResponseCodeEnum.UNHANDELEDEXCEPTION;
-                response.Data = "There is some problem in the application, please try after some time";
+                response.Code = 1001;
+                // response.Code = ResponseCodeEnum.UNHANDELEDEXCEPTION;
+                // response.Data = "There is some problem in the application, please try after some time";
             }
             return response.ToHttpResponse();
         }
@@ -362,7 +379,7 @@ namespace Charactify.API.Controllers
             try
             {
                 response.Code = 1001;
-                response.Data = srv.ApproveScore(objScore,  currentUserId).ToString();
+                response.Data = srv.ApproveScore(objScore, currentUserId).ToString();
             }
             catch
             {
@@ -1381,7 +1398,7 @@ namespace Charactify.API.Controllers
             try
             {
                 response.Code = 1001;
-                response.Data = srv.GetFeedResponseOnFeedId(Obj,  currentUserId);
+                response.Data = srv.GetFeedResponseOnFeedId(Obj, currentUserId);
             }
             catch
             {
@@ -1648,8 +1665,8 @@ namespace Charactify.API.Controllers
                 string deviceid = "faMw6VhALK8:APA91bEzsvOulPnPSr6dGnwR3z_TNJ0xlc4RBjxlFxQYNdG9vh_FNSUi7arnJBzoefgvT7GUrUXoFMAB8ExmiICAFKaLjVZDWsVcNdFW5C9XcuQdD_6ezGmhqMATXyEkG7PCKvg1fDrT";
                 response.Code = 1001;
                 //  response.Data = srv.pushMessage(objNotification, currentUserId).ToString();
-               // response.Data = 
-                   // srv.pushMessage(deviceid);
+                // response.Data = 
+                // srv.pushMessage(deviceid);
                 srv.pushios(deviceid);
             }
             catch
@@ -1775,6 +1792,55 @@ namespace Charactify.API.Controllers
                 //{
                 //    response.Code = ResponseCodeEnum.UNHANDELEDEXCEPTION;
                 //}
+            }
+            catch
+            {
+                response.Code = ResponseCodeEnum.UNHANDELEDEXCEPTION;
+                response.Data = "There is some problem in the application, please try after some time";
+            }
+            return response.ToHttpResponse();
+        }
+
+
+        [HttpPost]
+        [Route("SendSms")]
+        public IActionResult SendSms([FromBody] FeedRequest objaf)
+        {
+            string ret = "0";
+            string currentUserId = Convert.ToString(Request.Headers["currentUserId"], CultureInfo.InvariantCulture);
+            var response = new SingleResponse<string>();
+            try
+            {
+                ret = srv.sendinvitation("+918439728367", "2345");
+                //if (ret > 0)
+                //{
+                //    response.Code = ResponseCodeEnum.OK;
+                //    response.Data = ret.ToString();
+                //}
+                //else if (ret <= 0)
+                //{
+                //    response.Code = ResponseCodeEnum.UNHANDELEDEXCEPTION;
+                //}
+            }
+            catch
+            {
+                response.Code = ResponseCodeEnum.UNHANDELEDEXCEPTION;
+                response.Data = "There is some problem in the application, please try after some time";
+            }
+            return response.ToHttpResponse();
+        }
+
+        [HttpPost]
+        [Route("VerifyEmailOrPhone")]
+        public IActionResult VerifyEmailOrPhone([FromBody] VerifyEmailOrPhone objaf)
+        {
+            string ret = "0";
+            string currentUserId = Convert.ToString(Request.Headers["currentUserId"], CultureInfo.InvariantCulture);
+            var response = new SingleResponse<string>();
+            try
+            {
+                ret = srv.VerifyEmailOrPhone(objaf, currentUserId);
+
             }
             catch
             {

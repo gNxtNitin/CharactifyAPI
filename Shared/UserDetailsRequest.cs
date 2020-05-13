@@ -24,6 +24,8 @@ namespace Charactify.API
 
         public string AppUserName { get; set; }
 
+        public string EmailId { get; set; }
+
     }
 
     public class UserWorkDetails

@@ -50,7 +50,7 @@ namespace Charactify.API.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Server=217728;Database=DB_A3F3A5_Charactify;User Id=sa; Password=gNxt@123;");
+                optionsBuilder.UseSqlServer("Server=217728;Database=DB_A3F3A5_Charactify;User Id=sa; Password=gNxt@123;");  // live
             }
         }
 
@@ -292,6 +292,8 @@ namespace Charactify.API.Models
                     .HasMaxLength(150);
 
                 entity.Property(e => e.InvitedName).HasMaxLength(300);
+
+                entity.Property(e => e.InvitedPhone).HasMaxLength(50);
 
                 entity.Property(e => e.InviteeId).HasColumnName("InviteeID");
 

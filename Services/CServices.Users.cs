@@ -32,7 +32,7 @@ using Newtonsoft.Json.Linq;
 using System.Net.Http;
 using Microsoft.SqlServer.Server;
 using Microsoft.AspNetCore.Http;
-
+using System.Web;
 
 namespace Charactify.API.Services
 {
@@ -55,11 +55,11 @@ namespace Charactify.API.Services
         string FullUrl = "https://www.charactify.me:8443/video?url=";
         string baseDir = "";
         //Boolean Apilog = CResources.Apilog();
-        //int CardWhite = CResources.CardWhite();
+        // int CardWhite = CResources.CardWhite();
         //int CardGray = CResources.CardGray();
         //int CardGolden = CResources.CardGolden();
         Boolean Apilog = true;
-        int CardWhite = 5;
+        int CardWhite = 0;
         int CardGray = 100;
         int CardGolden = 500;
 
@@ -112,9 +112,10 @@ namespace Charactify.API.Services
                     }
                     catch (Exception e)
                     {
+                        mn.LogError(e.ToString());
                         dbContextTransaction.Rollback();
                         throw e;
-                        mn.LogError(e.ToString());
+
                     }
                 }
             }
@@ -139,13 +140,34 @@ namespace Charactify.API.Services
                 {
                     try
                     {
-                        var result = (from usr in db.UserMaster where (usr.EmailId == users.EmailId) && ((usr.Status == "A")) select usr).FirstOrDefault();
+
+                        var result = (from usr in db.UserMaster where (usr.Phone == users.Phone || usr.UserName == users.Phone) && ((usr.Status == "A")) select usr).FirstOrDefault();
+                        users.Phone = users.PhoneNo;
+                        if (users.CreatedVia == "PH")
+                        {
+                            result = (from usr in db.UserMaster where (usr.Phone == users.Phone || usr.UserName == users.Phone) && ((usr.Status == "A")) select usr).FirstOrDefault();
+
+                        }
+                        else
+                        {
+                            result = (from usr in db.UserMaster where (usr.EmailId == users.EmailId || usr.UserName == users.EmailId) && ((usr.Status == "A")) select usr).FirstOrDefault();
+
+                        }
                         if (result == null)
                         {
+                            // mn.LogError(users.Phone);
                             int i = 0;
+                            string[] username = new string[3];
                             string aapname = null;
                             var Appusername = (dynamic)null;
-                            string[] username = users.EmailId.Split("@");
+                            if (users.EmailId == null || users.EmailId == "")
+                            {
+                                username[0] = users.FirstName.ToString();
+                            }
+                            else
+                            {
+                                username = users.EmailId.Split("@");
+                            }
                             Appusername = (from usr in db.UserMaster where (usr.AppUserName == username[0].ToString()) select usr).FirstOrDefault();
                             users.AppUserName = appUserName(username[0]);
                             while (Appusername != null)
@@ -159,14 +181,20 @@ namespace Charactify.API.Services
 
 
                             //users.AppUserName = appUserName(username[0]);
-                            if (!string.IsNullOrEmpty(users.Password) && users.CreatedVia == "EM")
+                            if (!string.IsNullOrEmpty(users.Password) && (users.CreatedVia == "EM" || users.CreatedVia == "PH"))
                             {
                                 users.Password = Manager.Encrypt(users.Password);
                                 users.Status = "P";
+                                users.Phoneverify = false;
+                                users.Emailverify = false;
                             }
+
                             else
                             {
                                 users.Status = "A";
+                                //users.veri = "A";
+                                users.Phoneverify = false;
+                                users.Emailverify = true;
                             }
 
                             if (users.FirstName == null || users.FirstName.ToUpper() == "NULL" || users.FirstName == "")
@@ -185,9 +213,18 @@ namespace Charactify.API.Services
                             {
                                 users.LastName = users.LastName.First().ToString().ToUpper() + users.LastName.Substring(1);
                             }
+                            if (users.CreatedVia == "PH")
+                            {
+                                users.UserName = users.Phone;
+                            }
+                            else
+                            {
+                                users.UserName = users.EmailId;
+                            }
                             var u = new UserMasters()
                             {
                                 UserName = users.UserName,
+
                                 EmailId = users.EmailId,
                                 Password = users.Password,
                                 Status = users.Status,
@@ -200,7 +237,9 @@ namespace Charactify.API.Services
                                 UserProfilePic = users.UserProfilePic,
                                 Phone = users.Phone,
                                 UniqueId = users.UniqueId,
-                                AppUserName = users.AppUserName
+                                AppUserName = users.AppUserName,
+                                VerifiedPhone = users.Phoneverify,
+                                VerifiedEmail = users.Emailverify
                             };
                             db.UserMaster.Add(u);
                             ret = db.SaveChanges();
@@ -231,7 +270,14 @@ namespace Charactify.API.Services
                             {
                                 dbContextTransaction.Commit();
                                 res.UserID = u.UserId;
-                                res.UserName = u.UserName;
+                                if (users.CreatedVia == "PH")
+                                {
+                                    res.UserName = u.Phone;
+                                }
+                                else
+                                {
+                                    res.UserName = u.EmailId;
+                                }
                                 res.FirstName = u.FirstName;
                                 res.EmailD = u.EmailId;
                                 if (!string.IsNullOrEmpty(u.UserProfilePic))
@@ -259,17 +305,26 @@ namespace Charactify.API.Services
                         else
                         {
                             dbContextTransaction.Rollback();
-                            if (!string.IsNullOrEmpty(users.Password) && users.CreatedVia == "EM")
+                            // mn.LogError(users.CreatedVia);
+                            if (!string.IsNullOrEmpty(users.Password) && (users.CreatedVia == "EM" || users.CreatedVia == "PH"))
                             {
                                 users.Password = Manager.Encrypt(users.Password);
                             }
                             string connStr = CResources.GetConnectionString();
                             ArrayList arrList = new ArrayList();
-                            SP.spArgumentsCollection(arrList, "@EmailID", users.EmailId.ToString(), "varchar", "I");
+                            if (!string.IsNullOrEmpty(users.EmailId))
+                            {
+                                SP.spArgumentsCollection(arrList, "@EmailID", users.EmailId.ToString(), "varchar", "I");
+                            }
+                            if (!string.IsNullOrEmpty(users.Phone))
+                            {
+                                SP.spArgumentsCollection(arrList, "@Phone", users.Phone.ToString(), "varchar", "I");
+                            }
                             SP.spArgumentsCollection(arrList, "@Password", users.Password.ToString(), "varchar", "I");
                             SP.spArgumentsCollection(arrList, "@type", users.CreatedVia.ToString(), "varchar", "I");
                             DataSet ds = new DataSet();
                             ds = SP.RunStoredProcedure(connStr, ds, "SP_GetLoginDetails", arrList);
+                            mn.LogError(ds.ToString());
                             if (ds.Tables.Count > 0)
                             {
                                 data = JsonConvert.SerializeObject(ds.Tables[0]);
@@ -280,11 +335,19 @@ namespace Charactify.API.Services
                     }
                     catch (Exception e)
                     {
-                        dbContextTransaction.Rollback();
+                        data = "-1";
                         objLog.Response = e.ToString();
                         objLog.LogId = RequestID;
                         ResponseLog(objLog);
                         mn.LogError(e.ToString());
+                        if (Apilog == true)
+                        {
+                            Task.Run(() =>
+                            {
+                                var reslogin = RequestLog1(objLog);
+                            });
+                        }
+                        dbContextTransaction.Rollback();
                         throw e;
                     }
                     finally
@@ -292,6 +355,7 @@ namespace Charactify.API.Services
                         objLog.Response = data;
                         objLog.LogId = RequestID;
                         ResponseLog(objLog);
+                        // mn.LogError("Finally");
                         if (Apilog == true)
                         {
                             Task.Run(() =>
@@ -364,11 +428,18 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
-
+                data = "-1";
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var reslogin = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
@@ -397,7 +468,7 @@ namespace Charactify.API.Services
             int RequestID = 0;
             LogRequest objLog = new LogRequest();
             objLog.MethodName = "ForgotPassword";
-            objLog.Request = JsonConvert.SerializeObject(EmailID).ToString();
+            objLog.Request = JsonConvert.SerializeObject(EmailID + "," + type).ToString();
             objLog.currentUserId = currentUserId;
             RequestID = RequestLog(objLog);
             using (var db = new CContext())
@@ -405,41 +476,137 @@ namespace Charactify.API.Services
 
                 try
                 {
-                    var result = (from usr in db.UserMaster where (usr.EmailId == EmailID) && ((usr.Status == "A") || (usr.Status == "P")) orderby usr.UserId descending select usr).FirstOrDefault();
+                    var result = (from usr in db.UserMaster where ((usr.EmailId == EmailID) || (usr.Phone == EmailID) || (usr.UserName == EmailID)) && ((usr.Status == "A") || (usr.Status == "P")) orderby usr.UserId descending select usr).FirstOrDefault();
+                    if (type == "reset")
+                    {
+                        result = (from usr in db.UserMaster where ((usr.EmailId == EmailID && usr.VerifiedEmail == true) || (usr.Phone == EmailID && usr.VerifiedPhone == true) || (usr.UserName == EmailID)) && ((usr.Status == "A")) orderby usr.UserId descending select usr).FirstOrDefault();
+                    }
                     if (result != null)
                     {
-                        MailMessage Mail = new MailMessage();
                         ret = RandomNumber(1000, 9999);
                         otp = ret.ToString();
-                        string htmlString = null;
-                        if (type == "reset")
+                        if (type == "otp-verification")
                         {
-                            htmlString = "<html><body><p>Dear User,</p><p>Your verification code to reset the password is: </p> <b> {0} </b><p>Thanks, <br><b>Charactify Team <b></br></p></body></html>";
-                            Mail.Subject = "Verification Code to reset the password!";
+                            if (EmailID.Contains("@"))
+                            {
+                                MailMessage Mail = new MailMessage();
+
+                                string htmlString = null;
+                                htmlString = "<html><body><p>Dear User,</p><p>Your verification code for the registration is:  </p> <b> {0} </b><p>Thanks, <br><b>Charactify Team <b></br></p></body></html>";
+                                Mail.Subject = "Verification Code for registration!";
+
+                                htmlString = string.Format(htmlString, otp);
+                                SmtpClient SmtpServer = new SmtpClient("smtp.gmail.com");
+
+                                SmtpServer.Port = Convert.ToInt16(587);
+                                Mail.To.Add(EmailID);
+                                Mail.From = new MailAddress("charactifymail@gmail.com");
+
+                                Mail.Body = htmlString;
+                                Mail.IsBodyHtml = true;
+                                SmtpServer.UseDefaultCredentials = false;
+                                SmtpServer.Credentials = new System.Net.NetworkCredential("charactifymail@gmail.com", "Char123456");
+                                // SmtpServer.Credentials = new System.Net.NetworkCredential("democlientmail@gmail.com", "gnxt@123");
+                                SmtpServer.EnableSsl = true;
+                                Object state = ret;
+                                //event handler for asynchronous call
+                                SmtpServer.SendCompleted += new SendCompletedEventHandler(smtpClient_SendCompleted);
+                                //SmtpServer.Send(Mail);
+                                SmtpServer.SendAsync(Mail, state);
+                            }
+                            else
+                            {
+                                sendOtp(EmailID, otp);
+                            }
                         }
-                        else
+                        else if (type == "reset")
                         {
-                            htmlString = "<html><body><p>Dear User,</p><p>Your verification code for the registration is:  </p> <b> {0} </b><p>Thanks, <br><b>Charactify Team <b></br></p></body></html>";
-                            Mail.Subject = "Verification Code for registration!";
+                            if (result.VerifiedEmail == true && result.VerifiedPhone == true)
+                            {
+                                sendOtp(result.Phone, otp);
+                                SendEmail(result.EmailId, type, otp);
+                            }
+                            else if (result.VerifiedEmail == true)
+                            {
+                                SendEmail(result.EmailId, type, otp);
+                            }
+                            else if (result.VerifiedPhone == true)
+                            {
+                                sendOtp(result.Phone, otp);
+                            }
+                            else
+                            {
+                                if (EmailID.Contains("@"))
+                                {
+                                    MailMessage Mail = new MailMessage();
+
+                                    string htmlString = null;
+                                    if (type == "reset")
+                                    {
+                                        htmlString = "<html><body><p>Dear User,</p><p>Your verification code to reset the password is: </p> <b> {0} </b><p>Thanks, <br><b>Charactify Team <b></br></p></body></html>";
+                                        Mail.Subject = "Verification Code to reset the password!";
+                                    }
+                                    htmlString = string.Format(htmlString, otp);
+                                    SmtpClient SmtpServer = new SmtpClient("smtp.gmail.com");
+
+                                    SmtpServer.Port = Convert.ToInt16(587);
+                                    Mail.To.Add(EmailID);
+                                    Mail.From = new MailAddress("charactifymail@gmail.com");
+
+                                    Mail.Body = htmlString;
+                                    Mail.IsBodyHtml = true;
+                                    SmtpServer.UseDefaultCredentials = false;
+                                    SmtpServer.Credentials = new System.Net.NetworkCredential("charactifymail@gmail.com", "Char123456");
+                                    // SmtpServer.Credentials = new System.Net.NetworkCredential("democlientmail@gmail.com", "gnxt@123");
+                                    SmtpServer.EnableSsl = true;
+                                    Object state = ret;
+                                    //event handler for asynchronous call
+                                    SmtpServer.SendCompleted += new SendCompletedEventHandler(smtpClient_SendCompleted);
+                                    //SmtpServer.Send(Mail);
+                                    SmtpServer.SendAsync(Mail, state);
+                                }
+                                else
+                                {
+                                    sendOtp(EmailID, otp);
+                                }
+                            }
                         }
-                        htmlString = string.Format(htmlString, otp);
-                        SmtpClient SmtpServer = new SmtpClient("smtp.gmail.com");
+                        else if (type == "verify")
+                        {
+                            if (EmailID.Contains("@"))
+                            {
+                                MailMessage Mail = new MailMessage();
 
-                        SmtpServer.Port = Convert.ToInt16(587);
-                        Mail.To.Add(EmailID);
-                        Mail.From = new MailAddress("charactifymail@gmail.com");
+                                string htmlString = null;
+                                htmlString = "<html><body><p>Dear User,</p><p>Your verification code to verify the email:</p> <b> {0} </b><p>Thanks, <br><b>Charactify Team <b></br></p></body></html>";
+                                Mail.Subject = "Verification Code to verify your email";
 
-                        Mail.Body = htmlString;
-                        Mail.IsBodyHtml = true;
-                        SmtpServer.UseDefaultCredentials = false;
-                        SmtpServer.Credentials = new System.Net.NetworkCredential("charactifymail@gmail.com", "Char123456");
-                        // SmtpServer.Credentials = new System.Net.NetworkCredential("democlientmail@gmail.com", "gnxt@123");
-                        SmtpServer.EnableSsl = true;
-                        Object state = ret;
-                        //event handler for asynchronous call
-                        SmtpServer.SendCompleted += new SendCompletedEventHandler(smtpClient_SendCompleted);
-                        //SmtpServer.Send(Mail);
-                        SmtpServer.SendAsync(Mail, state);
+                                htmlString = string.Format(htmlString, otp);
+                                SmtpClient SmtpServer = new SmtpClient("smtp.gmail.com");
+
+                                SmtpServer.Port = Convert.ToInt16(587);
+                                Mail.To.Add(EmailID);
+                                Mail.From = new MailAddress("charactifymail@gmail.com");
+
+                                Mail.Body = htmlString;
+                                Mail.IsBodyHtml = true;
+                                SmtpServer.UseDefaultCredentials = false;
+                                SmtpServer.Credentials = new System.Net.NetworkCredential("charactifymail@gmail.com", "Char123456");
+                                // SmtpServer.Credentials = new System.Net.NetworkCredential("democlientmail@gmail.com", "gnxt@123");
+                                SmtpServer.EnableSsl = true;
+                                Object state = ret;
+                                //event handler for asynchronous call
+                                SmtpServer.SendCompleted += new SendCompletedEventHandler(smtpClient_SendCompleted);
+                                //SmtpServer.Send(Mail);
+                                SmtpServer.SendAsync(Mail, state);
+                            }
+                            else
+                            {
+                                sendOtp(EmailID, otp);
+                            }
+                        }
+
+
                         result.VerificationCode = ret.ToString();
                         db.UserMaster.Update(result);
                         ret = db.SaveChanges();
@@ -447,17 +614,24 @@ namespace Charactify.API.Services
                     }
                     else
                     {
-                        res = "Invalid EmailID";
+                        res = "Invalid EmailID or Phone Number";
                     }
 
                 }
                 catch (Exception e)
                 {
-
+                    res = "-1";
                     objLog.Response = e.ToString();
                     objLog.LogId = RequestID;
                     ResponseLog(objLog);
                     mn.LogError(e.ToString());
+                    if (Apilog == true)
+                    {
+                        Task.Run(() =>
+                        {
+                            var reslogin = RequestLog1(objLog);
+                        });
+                    }
                     throw e;
                 }
                 finally
@@ -478,6 +652,40 @@ namespace Charactify.API.Services
             return res;
         }
 
+        public void SendEmail(string EmailID, string type, string otp)
+        {
+            MailMessage Mail = new MailMessage();
+
+            string htmlString = null;
+            if (type == "reset")
+            {
+                htmlString = "<html><body><p>Dear User,</p><p>Your verification code to reset the password is: </p> <b> {0} </b><p>Thanks, <br><b>Charactify Team <b></br></p></body></html>";
+                Mail.Subject = "Verification Code to reset the password!";
+            }
+            else
+            {
+                htmlString = "<html><body><p>Dear User,</p><p>Your verification code for the registration is:  </p> <b> {0} </b><p>Thanks, <br><b>Charactify Team <b></br></p></body></html>";
+                Mail.Subject = "Verification Code for registration!";
+            }
+            htmlString = string.Format(htmlString, otp);
+            SmtpClient SmtpServer = new SmtpClient("smtp.gmail.com");
+
+            SmtpServer.Port = Convert.ToInt16(587);
+            Mail.To.Add(EmailID);
+            Mail.From = new MailAddress("charactifymail@gmail.com");
+
+            Mail.Body = htmlString;
+            Mail.IsBodyHtml = true;
+            SmtpServer.UseDefaultCredentials = false;
+            SmtpServer.Credentials = new System.Net.NetworkCredential("charactifymail@gmail.com", "Char123456");
+            // SmtpServer.Credentials = new System.Net.NetworkCredential("democlientmail@gmail.com", "gnxt@123");
+            SmtpServer.EnableSsl = true;
+            Object state = otp;
+            //event handler for asynchronous call
+            SmtpServer.SendCompleted += new SendCompletedEventHandler(smtpClient_SendCompleted);
+            //SmtpServer.Send(Mail);
+            SmtpServer.SendAsync(Mail, state);
+        }
         public int VerifyCode(string EmailID, string VerificationCode, string currentUserId)
         {
             int ret = 0;
@@ -485,7 +693,7 @@ namespace Charactify.API.Services
             int RequestID = 0;
             LogRequest objLog = new LogRequest();
             objLog.MethodName = "VerifyCode";
-            objLog.Request = JsonConvert.SerializeObject(EmailID).ToString();
+            objLog.Request = EmailID + ";" + VerificationCode;
             objLog.currentUserId = currentUserId;
             RequestID = RequestLog(objLog);
             using (var db = new CContext())
@@ -493,17 +701,29 @@ namespace Charactify.API.Services
 
                 try
                 {
-                    var result = (from usr in db.UserMaster where (usr.EmailId == EmailID) && (usr.VerificationCode == VerificationCode) orderby usr.UserId descending select usr).FirstOrDefault();
+                    var result = (from usr in db.UserMaster where (usr.EmailId == EmailID || usr.Phone == EmailID || usr.UserName == EmailID) && (usr.VerificationCode == VerificationCode) orderby usr.UserId descending select usr).FirstOrDefault();
                     if (result != null)
                     {
-
-                        if (result.CreatedVia == "EM" && result.Status == "P")
+                        if (EmailID.Contains("@") && EmailID == result.EmailId)
+                        {
+                            result.VerifiedEmail = true;
+                            result.UserName = EmailID;
+                        }
+                        else
+                        {
+                            if (EmailID == result.Phone)
+                            {
+                                result.VerifiedPhone = true;
+                                result.UserName = EmailID;
+                            }
+                        }
+                        if ((result.CreatedVia == "EM" || result.CreatedVia == "PH") && result.Status == "P")
                         {
                             result.Status = "A";
-                            db.UserMaster.Update(result);
-                            db.SaveChanges();
-                        }
 
+                        }
+                        db.UserMaster.Update(result);
+                        db.SaveChanges();
                         ret = result.UserId;
                     }
                     else
@@ -514,11 +734,18 @@ namespace Charactify.API.Services
                 }
                 catch (Exception e)
                 {
-
+                    ret = -1;
                     objLog.Response = e.ToString();
                     objLog.LogId = RequestID;
                     ResponseLog(objLog);
                     mn.LogError(e.ToString());
+                    if (Apilog == true)
+                    {
+                        Task.Run(() =>
+                        {
+                            var reslogin = RequestLog1(objLog);
+                        });
+                    }
                     throw e;
                 }
                 finally
@@ -590,16 +817,23 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
-
+                data = "-1";
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var reslogin = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
             {
-                objLog.Response = usr.ToString();
+                objLog.Response = data.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 if (Apilog == true)
@@ -641,10 +875,18 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                ret = -1;
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
@@ -687,73 +929,91 @@ namespace Charactify.API.Services
                 {
                     using (var dbContextTransaction = db.Database.BeginTransaction())
                     {
-                        var Dataex = (from usr in db.UserMaster where (usr.AppUserName == users.AppUserName && usr.UserId != users.UserID) && (usr.Status == "A") select usr).ToList();
-                        if (Dataex.Count == 0)
+                        var EmailOrPhone = (from usr in db.UserMaster where (((usr.UserName == users.EmailId || usr.EmailId == users.EmailId) && usr.UserId != users.UserID && !string.IsNullOrEmpty(usr.EmailId)) || ((usr.UserName == users.Phone || usr.Phone == users.Phone) && usr.UserId != users.UserID && !string.IsNullOrEmpty(usr.Phone))) && (usr.Status == "A") select usr).ToList();
+                        if (EmailOrPhone.Count == 0)
                         {
-                            var Log = (from usr in db.UserMaster where (usr.UserId == users.UserID) && (usr.Status == "A") select usr).FirstOrDefault();
-                            if (Log != null)
+                            var Dataex = (from usr in db.UserMaster where (usr.AppUserName == users.AppUserName && usr.UserId != users.UserID) && (usr.Status == "A") select usr).ToList();
+                            if (Dataex.Count == 0)
                             {
-                                Log.FirstName = users.FirstName;
-                                Log.LastName = users.LastName;
-                                //Log.DateOfBirth = Convert.ToDateTime(users.DateOfBirth, culture);
-                                // Log.DateOfBirth = Convert.ToDateTime(users.DateOfBirth.ToString("MM/dd/YYYY"));
-                                string[] date = users.DateOfBirth.Split("T");
-                                // SendPushNotification(date[0].ToString(), userDeviceId[1].ToString());
-                                Log.DateOfBirth = Convert.ToDateTime(date[0].ToString());
-                                Log.City = users.City;
-                                Log.Phone = users.Phone;
-                                Log.Gender = users.Gender;
-                                Log.ModifiedDate = Currentdatetime;
-                                Log.ModifiedBy = users.UserID;
-                                Log.AppUserName = users.AppUserName;
-                                db.UserMaster.Update(Log);
-                                ret = db.SaveChanges();
-                                //if (users.FirstName != null)
-                                //{
-                                //    Log.FirstName = users.FirstName;
-                                //    Log.ModifiedDate = DateTime.Now;
-                                //    Log.ModifiedBy = users.UserID;
-                                //    db.UserMaster.Update(Log);
-                                //    ret = db.SaveChanges();
-                                //}
-                                //else if (users.LastName != null)
-                                //{
-                                //    Log.LastName = users.LastName;
-                                //    Log.ModifiedDate = DateTime.Now;
-                                //    Log.ModifiedBy = users.UserID;
-                                //    db.UserMaster.Update(Log);
-                                //    ret = db.SaveChanges();
-                                //}
-                                //else if (users.DateOfBirth != null)
-                                //{
-                                //    Log.DateOfBirth = Convert.ToDateTime(users.DateOfBirth.ToString());
-                                //    Log.ModifiedDate = DateTime.Now;
-                                //    Log.ModifiedBy = users.UserID;
-                                //    db.UserMaster.Update(Log);
-                                //    ret = db.SaveChanges();
-                                //}
-                                //else if (users.City != null)
-                                //{
-                                //    Log.City = users.City;
-                                //    Log.ModifiedDate = DateTime.Now;
-                                //    Log.ModifiedBy = users.UserID;
-                                //    db.UserMaster.Update(Log);
-                                //    ret = db.SaveChanges();
-                                //}
-                                //else if (users.Phone != null)
-                                //{
-                                //    Log.Phone = users.Phone;
-                                //    Log.ModifiedDate = DateTime.Now;
-                                //    Log.ModifiedBy = users.UserID;
-                                //    db.UserMaster.Update(Log);
-                                //    ret = db.SaveChanges();
-                                //}
+                                var Log = (from usr in db.UserMaster where (usr.UserId == users.UserID) && (usr.Status == "A") select usr).FirstOrDefault();
+                                if (Log != null)
+                                {
+                                    if (Log.Phone != users.Phone)
+                                    {
+                                        Log.VerifiedPhone = false;
+                                    }
+                                    if (Log.EmailId != users.EmailId)
+                                    {
+                                        Log.VerifiedEmail = false;
+                                    }
 
+                                    Log.FirstName = users.FirstName;
+                                    Log.LastName = users.LastName;
+                                    //Log.DateOfBirth = Convert.ToDateTime(users.DateOfBirth, culture);
+                                    // Log.DateOfBirth = Convert.ToDateTime(users.DateOfBirth.ToString("MM/dd/YYYY"));
+                                    string[] date = users.DateOfBirth.Split("T");
+                                    // SendPushNotification(date[0].ToString(), userDeviceId[1].ToString());
+                                    Log.DateOfBirth = Convert.ToDateTime(date[0].ToString());
+                                    Log.City = users.City;
+                                    Log.Phone = users.Phone;
+                                    Log.EmailId = users.EmailId;
+                                    Log.Gender = users.Gender;
+                                    Log.ModifiedDate = Currentdatetime;
+                                    Log.ModifiedBy = users.UserID;
+                                    Log.AppUserName = users.AppUserName;
+                                    db.UserMaster.Update(Log);
+                                    ret = db.SaveChanges();
+                                    //if (users.FirstName != null)
+                                    //{
+                                    //    Log.FirstName = users.FirstName;
+                                    //    Log.ModifiedDate = DateTime.Now;
+                                    //    Log.ModifiedBy = users.UserID;
+                                    //    db.UserMaster.Update(Log);
+                                    //    ret = db.SaveChanges();
+                                    //}
+                                    //else if (users.LastName != null)
+                                    //{
+                                    //    Log.LastName = users.LastName;
+                                    //    Log.ModifiedDate = DateTime.Now;
+                                    //    Log.ModifiedBy = users.UserID;
+                                    //    db.UserMaster.Update(Log);
+                                    //    ret = db.SaveChanges();
+                                    //}
+                                    //else if (users.DateOfBirth != null)
+                                    //{
+                                    //    Log.DateOfBirth = Convert.ToDateTime(users.DateOfBirth.ToString());
+                                    //    Log.ModifiedDate = DateTime.Now;
+                                    //    Log.ModifiedBy = users.UserID;
+                                    //    db.UserMaster.Update(Log);
+                                    //    ret = db.SaveChanges();
+                                    //}
+                                    //else if (users.City != null)
+                                    //{
+                                    //    Log.City = users.City;
+                                    //    Log.ModifiedDate = DateTime.Now;
+                                    //    Log.ModifiedBy = users.UserID;
+                                    //    db.UserMaster.Update(Log);
+                                    //    ret = db.SaveChanges();
+                                    //}
+                                    //else if (users.Phone != null)
+                                    //{
+                                    //    Log.Phone = users.Phone;
+                                    //    Log.ModifiedDate = DateTime.Now;
+                                    //    Log.ModifiedBy = users.UserID;
+                                    //    db.UserMaster.Update(Log);
+                                    //    ret = db.SaveChanges();
+                                    //}
+
+                                }
+                            }
+                            else
+                            {
+                                ret = 10;
                             }
                         }
                         else
                         {
-                            ret = 10;
+                            ret = 0;
                         }
                         if (ret > 0)
                         {
@@ -775,7 +1035,14 @@ namespace Charactify.API.Services
                 ResponseLog(objLog);
                 response.Code = ResponseCodeEnum.UNHANDELEDEXCEPTION;
                 mn.LogError(e.ToString());
-                throw e;
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
+                //throw e;
             }
             finally
             {
@@ -811,11 +1078,11 @@ namespace Charactify.API.Services
                 {
 
 
-                    var userMaster = (from usr in db.UserMaster where (usr.EmailId == key) && (usr.Status == "A") orderby usr.UserId descending select usr).FirstOrDefault();
+                    var userMaster = (from usr in db.UserMaster where (usr.EmailId == key || usr.Phone == key || usr.UserName == key) && (usr.Status == "A") orderby usr.UserId descending select usr).FirstOrDefault();
                     if (userMaster != null)
                     {
                         userMaster.Password = Manager.Encrypt(newPwd);
-                        var userMasterpass = (from usr in db.UserMaster where (usr.EmailId == key) && (usr.Password == userMaster.Password) && (usr.Status == "A") orderby usr.UserId descending select usr).FirstOrDefault();
+                        var userMasterpass = (from usr in db.UserMaster where (usr.EmailId == key || usr.Phone == key || usr.UserName == key) && (usr.Password == userMaster.Password) && (usr.Status == "A") orderby usr.UserId descending select usr).FirstOrDefault();
                         if (userMasterpass == null)
                         {
                             db.UserMaster.Update(userMaster);
@@ -850,10 +1117,18 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                data = "-1";
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
@@ -901,15 +1176,24 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                data = "-1";
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
             {
-                objLog.Response = usr.ToString();
+
+                objLog.Response = data.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 if (Apilog == true)
@@ -933,18 +1217,16 @@ namespace Charactify.API.Services
             objLog.Request = JsonConvert.SerializeObject(Invreq).ToString();
             objLog.currentUserId = currentUserId;
             RequestID = RequestLog(objLog);
+            mn.LogError(JsonConvert.SerializeObject(Invreq).ToString());
             using (var db = new CContext())
             {
                 using (var dbContextTransaction = db.Database.BeginTransaction())
                 {
                     try
                     {
-
-
-
                         foreach (var res in Invreq)
                         {
-                            if (string.IsNullOrEmpty(res.InvitedEmailID))
+                            if (string.IsNullOrEmpty(res.InvitedEmailID) && string.IsNullOrEmpty(res.InvitedPhone))
                             {
                                 ret = -1;
                             }
@@ -956,7 +1238,7 @@ namespace Charactify.API.Services
                                     InviteVia = res.InviteVia,
                                     InviteViaId = res.InviteViaID,
                                     InvitedName = res.InvitedName,
-                                    InvitedPhone = Convert.ToInt32(res.InvitedPhone),
+                                    InvitedPhone = res.InvitedPhone,
                                     InvitedEmailId = res.InvitedEmailID,
                                     InviteReSent = res.InviteReSent,
                                     InviteSentDate = Currentdatetime,
@@ -968,78 +1250,101 @@ namespace Charactify.API.Services
                                 };
                                 db.InvitesMaster.Add(u);
                                 ret = db.SaveChanges();
-                                success = 1;
-                                if (success > 0)
+                                if (ret == 0)
                                 {
-                                    //dbContextTransaction.Commit();
-                                    string HtmlBody = " <html > " + " <body>" +
-                                        " <style>  @media only screen and (max-width:767px) { .top{padding:20px 10px !important;height: 81px !important;}.bnr{position: absolute; right: 10px !important;top: 40px !important;width: 100px !important;}.top h1{ margin:5px 0 0 7px !important; font-size: 15px !important;}}</style >" +
-                                        "<div id=\"emailer\" style=\"width: auto; max-width: 600px; margin: 0 auto; font-family: arial; padding: 0 7px; \">" +
-                                        "<div class=\"top\" style=\"position:relative; \">" +
+                                    break;
+                                }
+                                success = 1;
+                                if (!string.IsNullOrEmpty(res.InvitedEmailID) && res.InvitedEmailID != null)
+                                {
+                                    if (success > 0)
+                                    {
+                                        //dbContextTransaction.Commit();
+                                        string HtmlBody = " <html > " + " <body>" +
+                                            " <style>  @media only screen and (max-width:767px) { .top{padding:20px 10px !important;height: 81px !important;}.bnr{position: absolute; right: 10px !important;top: 40px !important;width: 100px !important;}.top h1{ margin:5px 0 0 7px !important; font-size: 15px !important;}}</style >" +
+                                            "<div id=\"emailer\" style=\"width: auto; max-width: 600px; margin: 0 auto; font-family: arial; padding: 0 7px; \">" +
+                                            "<div class=\"top\" style=\"position:relative; \">" +
 
-                                        //" <div class=\"MainBanner\" style=\"position:relative; height:100px;  background: url(https://www.charactify.net/Upload/banner-new.png); background-size: cover; \">" +
-                                        //"<div class=\"logo\" style=\"float:left;width:48%;\" > <img src=\"https://www.charactify.net//Upload//logo-white.png\" alt=\"\" width=\"125px\"> " +
+                                            //" <div class=\"MainBanner\" style=\"position:relative; height:100px;  background: url(https://www.charactify.net/Upload/banner-new.png); background-size: cover; \">" +
+                                            //"<div class=\"logo\" style=\"float:left;width:48%;\" > <img src=\"https://www.charactify.net//Upload//logo-white.png\" alt=\"\" width=\"125px\"> " +
 
-                                        //"<h1 style=\"color: #fff; font-size: 18px; line-height: 23px; margin: 18px 0 0 7px; font-family: arial\">Character is everything</h1>" +
-                                        //"</div>" +
-                                        // "</div>" +
+                                            //"<h1 style=\"color: #fff; font-size: 18px; line-height: 23px; margin: 18px 0 0 7px; font-family: arial\">Character is everything</h1>" +
+                                            //"</div>" +
+                                            // "</div>" +
 
-                                        "<img class=\"bnr\" src=\"https://www.charactify.net//Upload//banner-news.png\" alt=\"\" style=\"top: 0;width:100%; \"> " +
-                                        "</div>" +
-                                        "<div class=\"middle\">" +
-                                        "<p style=\"font-size: 16px; line-height: 22px; color: #756c6c;padding:0 0 20px;margin:0;\">An innovative platform enabling users to rate themselves and others based on select character traits.</p > " +
-                                        "</div>" +
-                                        "<div class=\"bottom\" style=\"background:#f5f5f5; overflow:hidden; padding: 3px 10px 10px 10px\">" +
-                                        "<p style=\"text-align: center; font-size:16px; line-height:22px;margin: 15px 0 15px; \">You have received this e-mail because you are invited to join Charactify group.</p>" +
-                                        "<p style=\"margin: 10px 0 0 0; font-size:19px; border-top: 1px dashed #ccc;padding-top:15px;text-align:center; font-weight:bold\">Charactify is available for Android </p > " +
-                                        " <aside style=\"text-align: center; margin-top:16px; margin-bottom:10px;\">" +
-                                        "<a style=\"display:inline-block; width: 165px; margin: 0 5px 0 0;\" href=\"https://play.google.com/store/apps/details?id=com.app.charactify&hl=en\">" +
-                                        "<img src=\"https://www.charactify.net/Upload/googleplay.png\" alt=\"\" style=\"width:100%;\"></a>" +
-                                        // "<a style=\"display: inline-block; width:165px; \"><img src=\"https://www.charactify.net/Upload/header-appstore.png\" alt=\"\" style=\"width:100%;\"></a>" +
-                                        "</aside></div > " +
-                                        "<div class=\"footer\" style=\"background: #000;overflow: hidden;padding: 10px 7px; text-align:center;\">" +
-                                        "<p style=\"padding: 0; line-height: 15px; font-size: 12px; margin: 0; color: #fff;\">© 2020 <a class=\"link\" href = \"https://www.charactify.com/\" style = \" color: #fff; font-size:11px;\" > Charactify </a> " +
-                                        ". All Rights Reserved <a href = \"https://www.charactify.com/tnc/\" style = \"color: #fff;\" > Terms & Conditions </a ></p > " +
-                                        "</div></div> </body ></html>";
+                                            "<img class=\"bnr\" src=\"https://www.charactify.net//Upload//banner-news.png\" alt=\"\" style=\"top: 0;width:100%; \"> " +
+                                            "</div>" +
+                                            "<div class=\"middle\">" +
+                                            "<p style=\"font-size: 16px; line-height: 22px; color: #756c6c;padding:0 0 20px;margin:0;\">An innovative platform enabling users to rate themselves and others based on select character traits.</p > " +
+                                            "</div>" +
+                                            "<div class=\"bottom\" style=\"background:#f5f5f5; overflow:hidden; padding: 3px 10px 10px 10px\">" +
+                                            "<p style=\"text-align: center; font-size:16px; line-height:22px;margin: 15px 0 15px; \">You have received this e-mail because you are invited to join Charactify group.</p>" +
+                                            "<p style=\"margin: 10px 0 0 0; font-size:19px; border-top: 1px dashed #ccc;padding-top:15px;text-align:center; font-weight:bold\">Charactify is available for Android </p > " +
+                                            " <aside style=\"text-align: center; margin-top:16px; margin-bottom:10px;\">" +
+                                            "<a style=\"display:inline-block; width: 165px; margin: 0 5px 0 0;\" href=\"https://play.google.com/store/apps/details?id=com.app.charactify&hl=en\">" +
+                                            "<img src=\"https://www.charactify.net/Upload/googleplay.png\" alt=\"\" style=\"width:100%;\"></a>" +
+                                            // "<a style=\"display: inline-block; width:165px; \"><img src=\"https://www.charactify.net/Upload/header-appstore.png\" alt=\"\" style=\"width:100%;\"></a>" +
+                                            "</aside></div > " +
+                                            "<div class=\"footer\" style=\"background: #000;overflow: hidden;padding: 10px 7px; text-align:center;\">" +
+                                            "<p style=\"padding: 0; line-height: 15px; font-size: 12px; margin: 0; color: #fff;\">© 2020 <a class=\"link\" href = \"https://www.charactify.com/\" style = \" color: #fff; font-size:11px;\" > Charactify </a> " +
+                                            ". All Rights Reserved <a href = \"https://www.charactify.com/tnc/\" style = \"color: #fff;\" > Terms & Conditions </a ></p > " +
+                                            "</div></div> </body ></html>";
 
-                                    SmtpClient SmtpServer = new SmtpClient("smtp.gmail.com");
-                                    MailMessage Mail = new MailMessage();
-                                    SmtpServer.Port = Convert.ToInt16(587);
-                                    Mail.To.Add(res.InvitedEmailID);
-                                    Mail.From = new MailAddress("charactifymail@gmail.com");
-                                    Mail.Subject = "Invitation Notification";
-                                    Mail.Body = HtmlBody;
-                                    Mail.IsBodyHtml = true;
-                                    SmtpServer.UseDefaultCredentials = false;
-                                    SmtpServer.Credentials = new System.Net.NetworkCredential("charactifymail@gmail.com", "Char123456");
-                                    SmtpServer.EnableSsl = true;
-                                    Object state = ret;
-                                    //event handler for asynchronous call
-                                    SmtpServer.SendCompleted += new SendCompletedEventHandler(smtpClient_SendCompleted);
-                                    //SmtpServer.Send(Mail);
-                                    SmtpServer.SendAsync(Mail, state);
+                                        SmtpClient SmtpServer = new SmtpClient("smtp.gmail.com");
+                                        MailMessage Mail = new MailMessage();
+                                        SmtpServer.Port = Convert.ToInt16(587);
+                                        Mail.To.Add(res.InvitedEmailID);
+                                        Mail.From = new MailAddress("charactifymail@gmail.com");
+                                        Mail.Subject = "Invitation Notification";
+                                        Mail.Body = HtmlBody;
+                                        Mail.IsBodyHtml = true;
+                                        SmtpServer.UseDefaultCredentials = false;
+                                        SmtpServer.Credentials = new System.Net.NetworkCredential("charactifymail@gmail.com", "Char123456");
+                                        SmtpServer.EnableSsl = true;
+                                        Object state = ret;
+                                        //event handler for asynchronous call
+                                        SmtpServer.SendCompleted += new SendCompletedEventHandler(smtpClient_SendCompleted);
+                                        //SmtpServer.Send(Mail);
+                                        SmtpServer.SendAsync(Mail, state);
+                                        ret = u.InvitesId;
+                                    }
+                                }
+                                if (!string.IsNullOrEmpty(res.InvitedPhone))
+                                {
+                                    sendinvitation(res.InvitedPhone, "");
                                     ret = u.InvitesId;
                                 }
 
-                                else
-                                {
-                                    dbContextTransaction.Rollback();
-                                }
                             }
+                        }
+                        if (ret > 0)
+                        {
+                            dbContextTransaction.Commit();
+                        }
+                        else
+                        {
+                            dbContextTransaction.Rollback();
                         }
                     }
                     catch (Exception e)
                     {
+                        mn.LogError(e.ToString());
+                        ret = -1;
                         dbContextTransaction.Rollback();
                         objLog.Response = e.ToString();
                         objLog.LogId = RequestID;
                         ResponseLog(objLog);
-                        mn.LogError(e.ToString());
-                        throw e;
+                        if (Apilog == true)
+                        {
+                            Task.Run(() =>
+                            {
+                                var resul = RequestLog1(objLog);
+                            });
+                        }
+                       // throw e;
                     }
                     finally
                     {
-                        dbContextTransaction.Commit();
                         objLog.Response = ret.ToString();
                         objLog.LogId = RequestID;
                         ResponseLog(objLog);
@@ -1053,8 +1358,6 @@ namespace Charactify.API.Services
                     }
                 }
                 return ret;
-
-
             }
 
         }
@@ -1186,11 +1489,19 @@ namespace Charactify.API.Services
                     }
                     catch (Exception e)
                     {
-                        dbContextTransaction.Rollback();
+                        ret = -1;
                         objLog.Response = e.ToString();
                         objLog.LogId = RequestID;
                         ResponseLog(objLog);
                         mn.LogError(e.ToString());
+                        if (Apilog == true)
+                        {
+                            Task.Run(() =>
+                            {
+                                var resul = RequestLog1(objLog);
+                            });
+                        }
+                        dbContextTransaction.Rollback();
                         throw e;
                     }
                     finally
@@ -1260,11 +1571,19 @@ namespace Charactify.API.Services
                     }
                     catch (Exception e)
                     {
-                        dbContextTransaction.Rollback();
+                        ret = -1;
                         objLog.Response = e.ToString();
                         objLog.LogId = RequestID;
                         ResponseLog(objLog);
                         mn.LogError(e.ToString());
+                        if (Apilog == true)
+                        {
+                            Task.Run(() =>
+                            {
+                                var resul = RequestLog1(objLog);
+                            });
+                        }
+                        dbContextTransaction.Rollback();
                         throw e;
                     }
                     finally
@@ -1333,10 +1652,18 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                ret = -1;
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
@@ -1405,10 +1732,18 @@ namespace Charactify.API.Services
                         }
                         catch (Exception e)
                         {
+                            ret = -1;
                             objLog.Response = e.ToString();
                             objLog.LogId = RequestID;
                             ResponseLog(objLog);
                             mn.LogError(e.ToString());
+                            if (Apilog == true)
+                            {
+                                Task.Run(() =>
+                                {
+                                    var resul = RequestLog1(objLog);
+                                });
+                            }
                             throw e;
                         }
                         finally
@@ -1568,10 +1903,18 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                data = "-1";
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
@@ -1677,10 +2020,18 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                data = "-1";
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
@@ -1799,10 +2150,18 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                data = "-1";
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
@@ -1919,10 +2278,18 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                data = "-1";
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
@@ -1967,10 +2334,18 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                data = "-1";
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
@@ -2032,10 +2407,18 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                ret = -1;
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
@@ -2121,11 +2504,19 @@ namespace Charactify.API.Services
                     }
                     catch (Exception ex)
                     {
+                        ret = -1;
                         dbContextTransaction.Rollback();
                         objLog.Response = ex.ToString();
                         objLog.LogId = RequestID;
                         ResponseLog(objLog);
                         mn.LogError(ex.ToString());
+                        if (Apilog == true)
+                        {
+                            Task.Run(() =>
+                            {
+                                var resul = RequestLog1(objLog);
+                            });
+                        }
                         throw ex;
                     }
                     finally
@@ -2178,10 +2569,18 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                data = "-1";
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
@@ -2233,11 +2632,19 @@ namespace Charactify.API.Services
 
                     catch (Exception e)
                     {
+                        ret = -1;
                         dbContextTransaction.Rollback();
                         objLog.Response = e.ToString();
                         objLog.LogId = RequestID;
                         ResponseLog(objLog);
                         mn.LogError(e.ToString());
+                        if (Apilog == true)
+                        {
+                            Task.Run(() =>
+                            {
+                                var resul = RequestLog1(objLog);
+                            });
+                        }
                         throw e;
                     }
                     finally
@@ -2289,6 +2696,7 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                data = "-1";
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
@@ -2370,10 +2778,18 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                data = "-1";
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
@@ -2424,10 +2840,18 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                data = "-1";
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
@@ -2493,11 +2917,18 @@ namespace Charactify.API.Services
                     }
                     catch (Exception ex)
                     {
-                        // dbContextTransaction.Rollback();
+                        ret = -1;
                         objLog.Response = ex.ToString();
                         objLog.LogId = RequestID;
                         ResponseLog(objLog);
                         mn.LogError(ex.ToString());
+                        if (Apilog == true)
+                        {
+                            Task.Run(() =>
+                            {
+                                var resul = RequestLog1(objLog);
+                            });
+                        }
                         throw ex;
                     }
                     finally
@@ -2563,11 +2994,18 @@ namespace Charactify.API.Services
             }
             catch (Exception ex)
             {
-
+                data = "-1";
                 objLog.Response = ex.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(ex.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw ex;
             }
             finally
@@ -2608,6 +3046,7 @@ namespace Charactify.API.Services
             LogRequest objLog = new LogRequest();
             objLog.MethodName = "AddFeed";
             objLog.Request = JsonConvert.SerializeObject(objaf).ToString();
+
             objLog.currentUserId = currentUserId;
             //dynamic res =null;
             //RequestID = Convert.ToInt32(res);
@@ -2643,7 +3082,7 @@ namespace Charactify.API.Services
                             string filename = null;
                             if (uwdr.FileType == "video")
                             {
-                                mn.LogError(uwdr.filePath);
+                                //  mn.LogError(uwdr.filePath);
                                 // filename = ConvertToVideo(uwdr.filePath, objaf.FromUserID, feedid, uwdr.Fileformat);
                                 filename = ConvertToVideoFornode(uwdr.filePath, objaf.FromUserID, feedid, uwdr.Fileformat);
 
@@ -2669,19 +3108,22 @@ namespace Charactify.API.Services
                         if (ret > 0)
                         {
                             dbContextTransaction.Commit();
-                            foreach (var uwdr in objaf.taggingslst)
+                            if (objaf.FeedType != "Story")
                             {
-                                var ut = new Models.Tagging()
+                                foreach (var uwdr in objaf.taggingslst)
                                 {
-                                    FeedId = feedid,
-                                    UserId = uwdr.Touserid,
-                                    //Description = uwdr.Description,
-                                    CreatedDate = Currentdatetime,
-                                    CreatedBy = uwdr.userid.ToString()
-                                };
-                                db.Tagging.Add(ut);
-                                ret = db.SaveChanges();
-                                addNotification(uwdr.userid, uwdr.Touserid, "Tagging", feedid, objaf.FeedID);
+                                    var ut = new Models.Tagging()
+                                    {
+                                        FeedId = feedid,
+                                        UserId = uwdr.Touserid,
+                                        //Description = uwdr.Description,
+                                        CreatedDate = Currentdatetime,
+                                        CreatedBy = uwdr.userid.ToString()
+                                    };
+                                    db.Tagging.Add(ut);
+                                    ret = db.SaveChanges();
+                                    addNotification(uwdr.userid, uwdr.Touserid, "Tagging", feedid, objaf.FeedID);
+                                }
                             }
                         }
                         else
@@ -2693,14 +3135,23 @@ namespace Charactify.API.Services
             }
             catch (Exception ex)
             {
+                ret = -1;
                 objLog.Response = ex.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(ex.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var res = RequestLog1(objLog);
+                    });
+                }
                 throw ex;
             }
             finally
             {
+
                 objLog.Response = ret.ToString();
                 objLog.LogId = RequestID;
                 //ResponseLog(objLog);
@@ -2758,15 +3209,24 @@ namespace Charactify.API.Services
             }
             catch (Exception ex)
             {
+                ret = -1;
+                objLog.Response = ex.ToString();
                 //mgr.LogFileWrite(ex);
                 //  ret = TPResources.DBEXCEPTIONRETVALUE;
                 mn.LogError(ex.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw ex;
             }
             finally
             {
-                //objLog.Response = ret.ToString();
-                //objLog.LogId = RequestID;
+                objLog.Response = ret.ToString();
+                // objLog.LogId = RequestID;
                 //ResponseLog(objLog);
                 if (Apilog == true)
                 {
@@ -2821,11 +3281,18 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
-
+                ret = -1;
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
@@ -2842,7 +3309,6 @@ namespace Charactify.API.Services
                 }
             }
             return ret;
-
 
         }
 
@@ -2888,10 +3354,18 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                ret = -1;
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
@@ -2943,10 +3417,18 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                data = "-1";
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
                 throw e;
             }
             finally
@@ -3515,6 +3997,7 @@ namespace Charactify.API.Services
                     }
                     catch (Exception ex)
                     {
+                        mn.LogError(ex.ToString());
                         dbContextTransaction.Rollback();
                         throw ex;
                     }
@@ -3637,7 +4120,7 @@ namespace Charactify.API.Services
 
         //public string  ConvertMp4Videonew(string Url)
         //{
-        //    // HttpResponseMessage response = await client.PutAsJsonAsync(
+        //    // HttpResponseMessage response = await client.PumtAsJsonAsync(
         //    //    $"api/products/{Url}", Url);
         //    //response.EnsureSuccessStatusCode();
 
@@ -3898,101 +4381,6 @@ namespace Charactify.API.Services
             fileStream.Write(data, 0, data.Length);
         }
 
-        //public string ConvertToVideo(string data, int userid, int Feedid, string Fileformat)
-        //{
-        //    string filename = null;
-        //    Guid obj = Guid.NewGuid();
-        //    string path = Directory.GetCurrentDirectory();
-        //    baseDir = path + "\\Upload\\";
-        //    if (!Directory.Exists(baseDir))
-        //    {
-        //        Directory.CreateDirectory(baseDir);
-        //    }
-        //    byte[] bytes = Convert.FromBase64String(data);
-        //    string date = DateTime.Now.ToString().Replace(@"/", @"_").Replace(@":", @"_").Replace(@" ", @"_");
-        //    FileInfo orgFile = new FileInfo(baseDir + Convert.ToString(userid) + "_" + Convert.ToString(Feedid) + "_" + obj.ToString()+"Original" + Fileformat);
-        //    //using (Stream sw = orgFile.OpenWrite())
-        //    //{
-        //    //    sw.Write(bytes, 0, bytes.Length);
-        //    //    sw.Close();
-        //    //}
-        //    // FileInfo fil = new FileInfo(baseDir + Convert.ToString(userid) + "_" + Convert.ToString(Feedid) + "_" + obj.ToString() + Fileformat);
-        //    //using (var msi = new MemoryStream(bytes))
-        //    //using (var mso = new MemoryStream())
-        //    //{
-        //    //    using (var gs = new GZipStream(mso, CompressionMode.Compress))
-        //    //    {
-        //    //        int cnt;
-        //    //        while ((cnt = msi.Read(bytes, 0, bytes.Length)) != 0)
-        //    //        {
-        //    //            gs.Write(bytes, 0, cnt);
-        //    //        }
-        //    //    }
-        //    //    using (Stream sw = fil.OpenWrite())
-        //    //    {
-        //    //        sw.Write(mso.ToArray(), 0, mso.ToArray().Length);
-        //    //        sw.Close();
-        //    //    }
-        //    //    //return mso.ToArray();
-        //    //}
-        //    //var inputFile = new MediaFile { Filename = @"C:\Ravi\CharactifyAPI\Charactify.API\Upload\2274_963_aca6603c-e942-4912-a188-5835bf9c6896.mp4" };
-        //    //var outputFile = new MediaFile { Filename = @"C:\Ravi\CharactifyAPI\Charactify.API\Upload\To_Save_New_Video.flv" };
-
-        //    //var conversionOptions = new ConversionOptions
-        //    //{
-        //    //    MaxVideoDuration = TimeSpan.FromSeconds(30),
-        //    //    VideoAspectRatio = VideoAspectRatio.R16_9,
-        //    //    VideoSize = VideoSize.Hd480,
-        //    //    AudioSampleRate = AudioSampleRate.Hz44100
-        //    //};
-
-        //    //using (var engine = new Engine())
-        //    //{
-        //    //    engine.Convert(inputFile, outputFile, conversionOptions);
-        //    //}
-        //    //  IConversionResult result = await Conversion.ToMp4(Resources.MkvWithAudio, output).Start();
-
-
-        //    string tempfile = @"C:\Ravi\CharactifyAPI\Charactify.API\Upload\2274_963_aca6603c-e942-4912-a188-5835bf9c6896.mp4";
-        //    FileStream fs = File.Create(tempfile);
-        //    FileInfo fil = new FileInfo(@"C:\Ravi\CharactifyAPI\Charactify.API\Upload\new_2274_963_aca6603c-e942-4912-a188-5835bf9c6896.mp4");
-        //    using (Stream sw = fil.OpenWrite())
-        //    {
-        //        sw.Write(bytes, 0, bytes.Length);
-        //        sw.Flush();
-        //        sw.Close();
-        //        GC.Collect();
-        //    }
-
-        //    //AviManager aviManager = new AviManager(aviFilePath, true);
-        //    //VideoStream aviStream = aviManager.GetVideoStream();
-
-        //    //VideoStream newStream;
-        //    //AviManager newManager = aviStream.DecompressToNewFile(compressedAviPath, true, out newStream);
-
-        //    //aviManager.Close();
-        //    //save and close un-/re-compressed file
-        //    //newManager.Close();
-
-        //    //VideoWriter vw = new VideoWriter("test.avi", 30, 500, 500, true);
-        //    ////Then write your frame
-        //    //vw.WriteFrame(frame);
-
-        //    //Video File is a class you will see further down this post.  It has some basic information about the video
-        //    //VideoFile vf = null;
-        //    //try
-        //    //{
-        //    //    vf = new VideoFile(tempfile);
-        //    //}
-        //    //catch (Exception ex)
-        //    //{
-        //    //    throw ex;
-        //    //}
-
-        //    ////And, without adieu, a call to our main method for this functionality.
-        //    //GetVideoInfo(vf);
-        //    return filename;
-        //}
 
         private void CreateMovie(DateTime startDate, DateTime endDate)
         {
@@ -4230,7 +4618,7 @@ namespace Charactify.API.Services
                         UserMaster.Device = obj.Device;
                         UserMaster.IslogOff = false;
                         //feedreactions.Description = objaf.Description;
-                        UserMaster.CreatedVia = obj.CreatedVia;
+                      //UserMaster.CreatedVia = UserMaster.CreatedVia;
                         UserMaster.UserToken = obj.UserToken;
                         db.UserMaster.Update(UserMaster);
                         db.SaveChanges();
@@ -4869,7 +5257,7 @@ namespace Charactify.API.Services
 
             return filename;
         }
-
+        //  ravi 9140095326
         public string GetSpecificFeedResponse(GetFeedList Obj, string currentUserId)
         {
             List<GetFeedRections> getFeedReactions = new List<GetFeedRections>();
@@ -5619,8 +6007,6 @@ namespace Charactify.API.Services
                 }
             }
             return ret;
-
-
         }
 
         public int Addtagging(FeedRequest objaf, string currentUserId)
@@ -5910,7 +6296,8 @@ namespace Charactify.API.Services
                         body = Description,
                         title = "Charactify",
                         sound = "Enabled",
-                        click_action = "FCM_PLUGIN_ACTIVITY"
+                        click_action = "FCM_PLUGIN_ACTIVITY",
+                        Type = "Notification"
                     }
                 };
 
@@ -6265,7 +6652,7 @@ namespace Charactify.API.Services
                        "<div class=\"three\" style=\"float: right;margin: 40px 10px 0 0;width: 78px;text-align: center;\">" +
                        " <span style=\"display: block;  line-height: 80px; color: #41465c; font-size: 35px; position:relative;font-weight: bold;\"> " +
 
-                       "<cite style=\"position: absolute; left: 21px; top: 2px; font-style:normal; font-size:26px; \"> #AvgScore</cite>" +
+                       "<cite style=\"position: absolute; left: 0px; top: 2px; font-style:normal; font-size:25px; width:100%;text-align:center; \"> #AvgScore</cite>" +
                        "<img src='https://www.charactify.net\\Upload\\big.png' style=\"float:left; ; width:80px; \">" +
                        "</span>" +
                        "<span style=\"margin:-10px 2px 0 0; font-weight: bold; font-size: 20px; color:#41465c;display:block;\">" +
@@ -6277,21 +6664,21 @@ namespace Charactify.API.Services
 
                         "<li style=\"float: left;width: 65px;margin: 0 28px 0 0;position: relative;\">" +
                        "<img src='https://www.charactify.net\\Upload\\family.png' style=\"float:left; width: 69px; height:69px; \">" +
-                       "<span style=\"float:left; margin: 5px 0 0 10px; color: #41465c; font-weight: bold; font-size: 14px;position: absolute;left: 15px;top: 22px;\">#family" +
+                       "<span style=\"margin: 4px 0 0 0px; color: #41465c; font-weight: bold; font-size: 14px;position:absolute;left: 0px;top: 22px; text-align:center;width: 100%;\">#family" +
                        "</span > </li >" +
 
-                        "<li style=\"float:left; width: 69px; margin: 0 25px 0 0; position:relative;\">" +
+                        "<li style=\"float:left; width: 69px; margin: 0 23px 0 0; position:relative;\">" +
                        "<img src='https://www.charactify.net\\Upload\\friends.png' style=\"float:left; width: 69px; height:69px; \">" +
-                       "<span style=\"float:left; margin: 5px 0 0 10px; color: #41465c; font-weight: bold; font-size: 14px;position: absolute;left: 15px;top: 22px;\">#friends" +
+                       "<span style=\"margin: 4px 0 0 0px; color: #41465c; font-weight: bold; font-size: 14px;position:absolute;left: 0px;top: 22px; text-align:center;width: 100%;\">#friends" +
                        "</span > </li >" +
-                       "<li style=\"float: left;width: 64px;margin: 0 27px 0 0;position: relative;\">" +
+                       "<li style=\"float: left;width: 67px;margin: 0 27px 0 0;position: relative;\">" +
                        "<img src='https://www.charactify.net\\Upload\\co-worker.png' style=\"float:left; width: 69px; height:69px;\">" +
-                       "<span style=\"float:left; margin: 5px 0 0 10px; color: #41465c; font-weight: bold; font-size: 14px;position: absolute;left: 15px;top: 22px;\">#co-worker" +
+                       "<span style=\"margin: 4px 0 0 0px; color: #41465c; font-weight: bold; font-size: 14px;position:absolute;left: 0px;top: 22px; text-align:center;width: 100%;\">#co-worker" +
                        "</span> </li >" +
 
-                       "<li style=\"float: left;width: 58px;margin: 0;position: relative; \">" +
+                       "<li style=\"float: left;width: 68px;margin: 0;position: relative; \">" +
                        "<img src='https://www.charactify.net\\Upload\\acquaintances.png' style=\"float:left; width: 69px; height:69px;\">" +
-                       "<span style=\"float:left; margin: 5px 0 0 10px; color: #41465c; font-weight: bold; font-size: 14px;position: absolute;left: 15px;top: 22px;\">#acquaintances" +
+                       "<span style=\"margin: 4px 0 0 0px; color: #41465c; font-weight: bold; font-size: 14px;position:absolute;left: 0px;top: 22px; text-align:center;width: 100%;\">#acquaintances" +
                        "</span > </li> </ul>" +
 
                      " </div>";
@@ -6381,7 +6768,7 @@ namespace Charactify.API.Services
                        "<div class=\"three\" style=\"float: right;margin: 40px 10px 0 0;width: 78px;text-align: center;\">" +
                        " <span style=\"display: block;  line-height: 80px; color: #41465c; font-size: 35px; position:relative;font-weight: bold;\"> " +
 
-                       "<cite style=\"position: absolute; left: 21px; top: 2px; font-style:normal; font-size:26px; \"> #AvgScore</cite>" +
+                       "<cite style=\"position: absolute; left: 0px; top: 2px; font-style:normal; font-size:25px; width:100%;text-align:center;\"> #AvgScore</cite>" +
                        "<img src='https://www.charactify.net\\Upload\\big.png' style=\"float:left; ; width:80px; \">" +
                        "</span>" +
                        "<span style=\"margin:-10px 2px 0 0; font-weight: bold; font-size: 20px; color:#41465c;display:block;\">" +
@@ -6391,23 +6778,23 @@ namespace Charactify.API.Services
                         //"<li style=\"background: url(C:\\Ravi\\family.png) no - repeat; margin - right: 38px; line - height: 69px; width: 69px; height: 69px; float:left; color: #41465c;font-weight: bold;\"># 9.2"
                         //+ "</li>" +
 
-                        "<li style=\"float: left;width: 65px;margin: 0 28px 0 0;position: relative;\">" +
+                        "<li style=\"float: left;width: 67px;margin: 0 28px 0 0;position: relative;\">" +
                        "<img src='https://www.charactify.net\\Upload\\family.png' style=\"float:left; width: 69px; height:69px; \">" +
-                       "<span style=\"float:left; margin: 5px 0 0 10px; color: #41465c; font-weight: bold; font-size: 14px;position: absolute;left: 15px;top: 22px;\">#family" +
+                       "<span style=\"float:left; margin: 4px 0 0 0px; color: #41465c; font-weight: bold; font-size: 14px;position:absolute;left: 0px;top: 22px; text-align:center;width: 100%;\">#family" +
                        "</span > </li >" +
 
-                        "<li style=\"float:left; width: 69px; margin: 0 25px 0 0; position:relative;\">" +
+                        "<li style=\"float:left; width: 69px; margin: 0 23px 0 0; position:relative;\">" +
                        "<img src='https://www.charactify.net\\Upload\\friends.png' style=\"float:left; width: 69px; height:69px; \">" +
-                       "<span style=\"float:left; margin: 5px 0 0 10px; color: #41465c; font-weight: bold; font-size: 14px;position: absolute;left: 15px;top: 22px;\">#friends" +
+                       "<span style=\"margin: 4px 0 0 0px; color: #41465c; font-weight: bold; font-size: 14px;position:absolute;left: 0px;top: 22px; text-align:center;width: 100%;\">#friends" +
                        "</span > </li >" +
-                       "<li style=\"float: left;width: 64px;margin: 0 27px 0 0;position: relative;\">" +
+                       "<li style=\"float: left;width: 67px;margin: 0 27px 0 0;position: relative;\">" +
                        "<img src='https://www.charactify.net\\Upload\\co-worker.png' style=\"float:left; width: 69px; height:69px;\">" +
-                       "<span style=\"float:left; margin: 5px 0 0 10px; color: #41465c; font-weight: bold; font-size: 14px;position: absolute;left: 15px;top: 22px;\">#co-worker" +
+                       "<span style=\"margin: 4px 0 0 0px; color: #41465c; font-weight: bold; font-size: 14px;position:absolute;left: 0px;top: 22px; text-align:center;width: 100%;\">#co-worker" +
                        "</span> </li >" +
 
-                       "<li style=\"float: left;width: 58px;margin: 0;position: relative; \">" +
+                       "<li style=\"float: left;width: 68px;margin: 0;position: relative; \">" +
                        "<img src='https://www.charactify.net\\Upload\\acquaintances.png' style=\"float:left; width: 69px; height:69px;\">" +
-                       "<span style=\"float:left; margin: 5px 0 0 10px; color: #41465c; font-weight: bold; font-size: 14px;position: absolute;left: 15px;top: 22px;\">#acquaintances" +
+                       "<span style=\"margin: 4px 0 0 0px; color: #41465c; font-weight: bold; font-size: 14px;position:absolute;left: 0px;top: 22px; text-align:center;width: 100%;\">#acquaintances" +
                        "</span > </li> </ul>" +
 
                      " </div>";
@@ -6496,7 +6883,7 @@ namespace Charactify.API.Services
                        "<div class=\"three\" style=\"float: right;margin: 40px 10px 0 0;width: 78px;text-align: center;\">" +
                        " <span style=\"display: block;  line-height: 80px; color: #41465c; font-size: 35px; position:relative;font-weight: bold;\"> " +
 
-                       "<cite style=\"position: absolute; left: 21px; top: 2px; font-style:normal; font-size:26px; \"> #AvgScore</cite>" +
+                       "<cite style=\"position: absolute; left: 0px; top: 2px; font-style:normal; font-size:25px; width:100%;text-align:center;\"> #AvgScore</cite>" +
                        "<img src='https://www.charactify.net\\Upload\\big.png' style=\"float:left; ; width:80px; \">" +
                        "</span>" +
                        "<span style=\"margin:-10px 2px 0 0; font-weight: bold; font-size: 20px; color:#41465c;display:block;\">" +
@@ -6506,23 +6893,23 @@ namespace Charactify.API.Services
                         //"<li style=\"background: url(C:\\Ravi\\family.png) no - repeat; margin - right: 38px; line - height: 69px; width: 69px; height: 69px; float:left; color: #41465c;font-weight: bold;\"># 9.2"
                         //+ "</li>" +
 
-                        "<li style=\"float: left;width: 65px;margin: 0 28px 0 0;position: relative;\">" +
+                        "<li style=\"float: left;width: 67px;margin: 0 28px 0 0;position: relative;\">" +
                        "<img src='https://www.charactify.net\\Upload\\family.png' style=\"float:left; width: 69px; height:69px; \">" +
-                       "<span style=\"float:left; margin: 5px 0 0 10px; color: #41465c; font-weight: bold; font-size: 14px;position: absolute;left: 15px;top: 22px;\">#family" +
+                       "<span style=\"float:left; margin: 4px 0 0 0px; color: #41465c; font-weight: bold; font-size: 14px;position:absolute;left: 0px;top: 22px; text-align:center;width: 100%;\">#family" +
                        "</span > </li >" +
 
-                        "<li style=\"float:left; width: 69px; margin: 0 25px 0 0; position:relative;\">" +
+                        "<li style=\"float:left; width: 69px; margin: 0 23px 0 0; position:relative;\">" +
                        "<img src='https://www.charactify.net\\Upload\\friends.png' style=\"float:left; width: 69px; height:69px; \">" +
-                       "<span style=\"float:left; margin: 5px 0 0 10px; color: #41465c; font-weight: bold; font-size: 14px;position: absolute;left: 15px;top: 22px;\">#friends" +
+                       "<span style=\"margin: 4px 0 0 0px; color: #41465c; font-weight: bold; font-size: 14px;position:absolute;left: 0px;top: 22px; text-align:center;width: 100%; \">#friends" +
                        "</span > </li >" +
-                       "<li style=\"float: left;width: 64px;margin: 0 27px 0 0;position: relative;\">" +
+                       "<li style=\"float: left;width: 67px;margin: 0 27px 0 0;position: relative;\">" +
                        "<img src='https://www.charactify.net\\Upload\\co-worker.png' style=\"float:left; width: 69px; height:69px;\">" +
-                       "<span style=\"float:left; margin: 5px 0 0 10px; color: #41465c; font-weight: bold; font-size: 14px;position: absolute;left: 15px;top: 22px;\">#co-worker" +
+                       "<span style=\"margin: 4px 0 0 0px; color: #41465c; font-weight: bold; font-size: 14px;position:absolute;left: 0px;top: 22px; text-align:center;width: 100%;\">#co-worker" +
                        "</span> </li >" +
 
-                       "<li style=\"float: left;width: 58px;margin: 0;position: relative; \">" +
+                       "<li style=\"float: left;width: 68px;margin: 0;position: relative; \">" +
                        "<img src='https://www.charactify.net\\Upload\\acquaintances.png' style=\"float:left; width: 69px; height:69px;\">" +
-                       "<span style=\"float:left; margin: 5px 0 0 10px; color: #41465c; font-weight: bold; font-size: 14px;position: absolute;left: 15px;top: 22px;\">#acquaintances" +
+                       "<span style=\"margin: 4px 0 0 0px; color: #41465c; font-weight: bold; font-size: 14px;position:absolute;left: 0px;top: 22px; text-align:center;width: 100%;\">#acquaintances" +
                        "</span > </li> </ul>" +
 
                      " </div>";
@@ -6676,7 +7063,7 @@ namespace Charactify.API.Services
                      //"<li style=\"background: url(C:\\Ravi\\family.png) no - repeat; margin - right: 38px; line - height: 69px; width: 69px; height: 69px; float:left; color: #41465c;font-weight: bold;\"># 9.2"
                      //+ "</li>" +
 
-                     "<li style=\"float: left;width: 65px;margin: 0 28px 0 0;position: relative;\">" +
+                     "<li style=\"float: left;width: 67px;margin: 0 28px 0 0;position: relative;\">" +
                     "<img src='https://www.charactify.net\\Upload\\family.png' style=\"float:left; width: 69px; height:69px; \">" +
                     "<span style=\"float:left; margin: 5px 0 0 10px; color: #41465c; font-weight: bold; font-size: 14px;position: absolute;left: 15px;top: 22px;\">#family" +
                     "</span > </li >" +
@@ -6820,6 +7207,18 @@ namespace Charactify.API.Services
                                 string myString = dataRorspa["ImagePath"].ToString();
                                 myString = myString.Remove(0, 1);
                                 filepath.Path = FullUrl + myString;
+                                string imgurl = myString.Replace(@".MP4", @".jpg");
+                                filepath.Thumbnailurl = @"C:\NITIN\1\1\" + imgurl.ToString();
+
+                                if (File.Exists(filepath.Thumbnailurl))
+                                {
+                                    filepath.Thumbnailurl = URL + "/" + imgurl.ToString();
+                                }
+                                else
+                                {
+                                    // \Upload\2512_3903_c20ae34d-52cd-4cdf-b23d-902c84b23562.jpeg
+                                    filepath.Thumbnailurl = URL + "/Upload/Thumbnail.jpg";
+                                }
                             }
                             else
                             {
@@ -6855,7 +7254,8 @@ namespace Charactify.API.Services
                             userRections.feedID = Convert.ToInt32(drReaction["feedid"].ToString());
                             userRections.Name = drReaction["UName"].ToString();
                             userRections.UserProfilePic = drReaction["ProfilePic"].ToString();
-
+                            userRections.FirstName = drReaction["FirstName"].ToString();
+                            userRections.LastName = drReaction["LastName"].ToString();
                             userRectionsType.userRectionsLst.Add(userRections);
                         }
                         //getFeedReaction.userRectionsLst.add
@@ -6949,21 +7349,23 @@ namespace Charactify.API.Services
                 {
                     Email email = new Email();
                     DataTable dt = new DataTable();
-                    dt.Columns.AddRange(new DataColumn[3]
+                    dt.Columns.AddRange(new DataColumn[4]
                     { new DataColumn("UserId", typeof(int)),
                             new DataColumn("Name", typeof(string)),
-                            new DataColumn("EmailId",typeof(string)) });
+                            new DataColumn("EmailId",typeof(string)),
+                            new DataColumn("Phone",typeof(string))
+                    });
 
                     if (Objreq.emails.Count > 0)
                     {
                         for (int a = 0; a < Objreq.emails.Count; a++)
                         {
-                            dt.Rows.Add(Objreq.Userid, Objreq.emails[a].name, Objreq.emails[a].emailid);
+                            dt.Rows.Add(Objreq.Userid, Objreq.emails[a].name, Objreq.emails[a].emailid.Replace(" ", String.Empty), (Objreq.emails[a].Phone.Replace(" ", String.Empty)).Replace("+91", " "));
                         }
                     }
                     else
                     {
-                        dt.Rows.Add(Objreq.Userid, "", "");
+                        dt.Rows.Add(Objreq.Userid, "", "", "");
                     }
 
                     string connStr = CResources.GetConnectionString();
@@ -6977,6 +7379,7 @@ namespace Charactify.API.Services
                         {
                             CommandType = CommandType.StoredProcedure
                         };
+                        cmd.CommandTimeout = 0;
                         cmd.Parameters.AddWithValue("@DataTable", dt);
                         SqlDataAdapter adap = new SqlDataAdapter(cmd);
                         adap.Fill(ds);
@@ -6994,8 +7397,9 @@ namespace Charactify.API.Services
                         //}
                         ds.Tables[0].TableName = "SearchList";
                         Manager mn = new Manager();
-                        mn.Response(data.ToString());
+
                         data = JsonConvert.SerializeObject(ds);
+                        mn.Response(ds.Tables[0].Rows.Count.ToString());
 
                     }
                     else
@@ -7011,6 +7415,7 @@ namespace Charactify.API.Services
                 mn.LogError(e.ToString());
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
+                mn.Response(data.ToString());
                 if (Apilog == true)
                 {
                     Task.Run(() =>
@@ -7064,7 +7469,7 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
-
+                data = "-1";
                 objLog.Response = e.ToString();
                 objLog.LogId = RequestID;
                 if (Apilog == true)
@@ -7175,6 +7580,18 @@ namespace Charactify.API.Services
                                 string myString = dataRorspa["ImagePath"].ToString();
                                 myString = myString.Remove(0, 1);
                                 filepath.Path = FullUrl + myString;
+                                string imgurl = myString.Replace(@".MP4", @".jpg");
+                                filepath.Thumbnailurl = @"C:\NITIN\1\1\" + imgurl.ToString();
+
+                                if (File.Exists(filepath.Thumbnailurl))
+                                {
+                                    filepath.Thumbnailurl = URL + "/" + imgurl.ToString();
+                                }
+                                else
+                                {
+                                    // \Upload\2512_3903_c20ae34d-52cd-4cdf-b23d-902c84b23562.jpeg
+                                    filepath.Thumbnailurl = URL + "/Upload/Thumbnail.jpg";
+                                }
                             }
                             else
                             {
@@ -7210,7 +7627,8 @@ namespace Charactify.API.Services
                             userRections.feedID = Convert.ToInt32(drReaction["feedid"].ToString());
                             userRections.Name = drReaction["UName"].ToString();
                             userRections.UserProfilePic = drReaction["ProfilePic"].ToString();
-
+                            getFeedReaction.FirstName = dr["firstname"].ToString();
+                            getFeedReaction.LastName = dr["LastName"].ToString();
                             userRectionsType.userRectionsLst.Add(userRections);
                         }
                         //getFeedReaction.userRectionsLst.add
@@ -7269,7 +7687,14 @@ namespace Charactify.API.Services
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
-                throw e;
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
+                // throw e;
             }
             finally
             {
@@ -7560,12 +7985,19 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                ret = -1;
                 objLog.Response = e.ToString();
-
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
-                throw e;
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
+                // throw e;
             }
             finally
             {
@@ -7662,12 +8094,19 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                ret = -1;
                 objLog.Response = e.ToString();
-
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
-                throw e;
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
+                // throw e;
             }
             finally
             {
@@ -7721,12 +8160,19 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                ret = -1;
                 objLog.Response = e.ToString();
-
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
-                throw e;
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
+               // throw e;
             }
             finally
             {
@@ -7791,6 +8237,7 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                data = "-1";
                 Manager mn = new Manager();
                 mn.LogError(e.ToString());
                 objLog.Response = e.ToString();
@@ -7802,7 +8249,7 @@ namespace Charactify.API.Services
                         var resul = RequestLog1(objLog);
                     });
                 }
-                throw e;
+               // throw e;
             }
             finally
             {
@@ -8189,12 +8636,19 @@ namespace Charactify.API.Services
             }
             catch (Exception e)
             {
+                ret = -1;
                 objLog.Response = e.ToString();
-
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
-                throw e;
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
+                //throw e;
             }
             finally
             {
@@ -8210,8 +8664,6 @@ namespace Charactify.API.Services
                 }
             }
             return ret;
-
-
 
         }
 
@@ -8431,7 +8883,14 @@ namespace Charactify.API.Services
                 objLog.LogId = RequestID;
                 ResponseLog(objLog);
                 mn.LogError(e.ToString());
-                throw e;
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
+               // throw e;
             }
             finally
             {
@@ -8551,8 +9010,6 @@ namespace Charactify.API.Services
             {
                 objLog.Response = ret.ToString();
                 objLog.LogId = RequestID;
-                //ResponseLog(objLog);
-
                 if (Apilog == true)
                 {
                     Task.Run(() =>
@@ -8655,7 +9112,7 @@ namespace Charactify.API.Services
             string filename = objaf.FileType;
             try
             {
-               
+
                 string date = DateTime.Now.ToString().Replace(@"/", @"_").Replace(@":", @"_").Replace(@" ", @"_");
                 string baseDir = @"C:\Users\gNxt007\Desktop\Image\", Fileformat = ".mp4";
                 string path = Directory.GetCurrentDirectory();
@@ -8688,13 +9145,240 @@ namespace Charactify.API.Services
 
                 }
                 mn.LogError(objaf.FileType.ToString());
-                
+
             }
-            catch(Exception e)
-            { 
-            mn.LogError(e.ToString());
+            catch (Exception e)
+            {
+                mn.LogError(e.ToString());
             }
             return filename;
+        }
+
+        public string sendinvitation(string mobileNumber, string TxtMsg)
+        {
+            mobileNumber = mobileNumber.Replace(" ", String.Empty);
+            LogRequest objLog = new LogRequest();
+            objLog.MethodName = "sendinvitation";
+
+            string Res = null;
+            //Your authentication key
+
+            string authKey = "321791AXvGbcQgSoqf5e61f03cP1";
+
+            //Sender ID,While using route4 sender id should be 6 characters long.
+
+            string senderId = "Charac";
+            //Your message to send, Add URL encoding here.
+
+            string message = HttpUtility.UrlEncode("Join Charactify, see what people truly think of you! Now the fun begins! https://play.google.com/store/apps/details?id=com.app.charactify&hl=en");
+
+            string Otp = HttpUtility.UrlEncode(TxtMsg);
+            //Prepare you post parameters
+
+            StringBuilder sbPostData = new StringBuilder();
+
+            sbPostData.AppendFormat("authkey={0}", authKey);
+
+            sbPostData.AppendFormat("&mobiles={0}", mobileNumber.Replace("+", " "));
+
+            sbPostData.AppendFormat("&message={0}", message);
+
+            sbPostData.AppendFormat("&sender={0}", senderId);
+            // "default" or 1 for promotion  4 is trans...
+            sbPostData.AppendFormat("&route={0}", 4);
+            objLog.Request = JsonConvert.SerializeObject(sbPostData).ToString();
+
+            try
+
+            {
+
+                //Call Send SMS API
+
+                string sendSMSUri = "http://api.msg91.com/api/sendhttp.php";
+                //string sendSMSUri = "https://control.msg91.com/api/sendotp.php";
+                //Create HTTPWebrequest   
+
+                HttpWebRequest httpWReq = (HttpWebRequest)WebRequest.Create(sendSMSUri);
+                //Prepare and Add URL Encoded data
+
+                UTF8Encoding encoding = new UTF8Encoding();
+
+                byte[] data = encoding.GetBytes(sbPostData.ToString());
+                //Specify post method
+
+                httpWReq.Method = "POST";
+
+                httpWReq.ContentType = "application/x-www-form-urlencoded";
+
+                httpWReq.ContentLength = data.Length;
+                using (Stream stream = httpWReq.GetRequestStream())
+
+                {
+
+                    stream.Write(data, 0, data.Length);
+
+                }
+                //Get the response
+
+                HttpWebResponse response = (HttpWebResponse)httpWReq.GetResponse();
+
+                StreamReader reader = new StreamReader(response.GetResponseStream());
+
+                string responseString = reader.ReadToEnd();
+
+                //Close the response
+
+                reader.Close();
+
+                response.Close();
+
+            }
+
+            catch (SystemException ex)
+
+            {
+
+                // MessageBox.Show(ex.Message.ToString());
+
+            }
+            finally
+            {
+                objLog.Response = "Success";
+                if (Apilog == true)
+                {
+                    Task.Run(() =>
+                    {
+                        var resul = RequestLog1(objLog);
+                    });
+                }
+            }
+            return Res;
+
+        }
+
+        public string sendOtp(string mobileNumber, string TxtMsg)
+        {
+            string Res = null;
+            //Your authentication key
+
+            string authKey = "321791AXvGbcQgSoqf5e61f03cP1";
+            //Multiple mobiles numbers separated by comma
+
+            //mobileNumber = "9140095326";
+            //Sender ID,While using route4 sender id should be 6 characters long.
+
+            string senderId = "Charac";
+            //Your message to send, Add URL encoding here.
+
+            string message = HttpUtility.UrlEncode(TxtMsg + " is the verification code (OTP) for your Charactify App. Please do not share with anyone. Thanks!");
+
+            string Otp = HttpUtility.UrlEncode(TxtMsg);
+            //Prepare you post parameters
+
+            StringBuilder sbPostData = new StringBuilder();
+
+            sbPostData.AppendFormat("authkey={0}", authKey);
+
+            sbPostData.AppendFormat("&mobiles={0}", mobileNumber);
+
+            sbPostData.AppendFormat("&message={0}", message);
+
+            sbPostData.AppendFormat("&sender={0}", senderId);
+
+            sbPostData.AppendFormat("&otp={0}", Otp);
+            sbPostData.AppendFormat("&otp_length={0}", 4);
+
+
+            // sbPostData.AppendFormat("&route={0}", "default");
+
+
+            try
+
+            {
+
+                //Call Send SMS API
+
+                //string sendSMSUri = "http://api.msg91.com/api/sendhttp.php";
+                string sendSMSUri = "https://control.msg91.com/api/sendotp.php";
+                //Create HTTPWebrequest   
+
+                HttpWebRequest httpWReq = (HttpWebRequest)WebRequest.Create(sendSMSUri);
+                //Prepare and Add URL Encoded data
+
+                UTF8Encoding encoding = new UTF8Encoding();
+
+                byte[] data = encoding.GetBytes(sbPostData.ToString());
+                //Specify post method
+
+                httpWReq.Method = "POST";
+
+                httpWReq.ContentType = "application/x-www-form-urlencoded";
+
+                httpWReq.ContentLength = data.Length;
+                using (Stream stream = httpWReq.GetRequestStream())
+
+                {
+
+                    stream.Write(data, 0, data.Length);
+
+                }
+                //Get the response
+
+                HttpWebResponse response = (HttpWebResponse)httpWReq.GetResponse();
+
+                StreamReader reader = new StreamReader(response.GetResponseStream());
+
+                string responseString = reader.ReadToEnd();
+
+
+                //Close the response
+
+                reader.Close();
+
+                response.Close();
+
+            }
+
+            catch (SystemException ex)
+
+            {
+
+                // MessageBox.Show(ex.Message.ToString());
+
+            }
+            return Res;
+
+        }
+
+        public void SendMsg()
+        {
+
+            //var client = new RestClient("https://control.msg91.com/api/sendotp.php?authkey=%24authkey&mobile=%24mobile_no&message=%24message&sender=%24senderid&otp_expiry=&otp_length=&country=&otp=%24otp&email=&template=");
+            //var request = new RestRequest(Method.POST);
+            //IRestResponse response = client.Execute(request);
+        }
+
+        public string VerifyEmailOrPhone(VerifyEmailOrPhone obj, string currentUserId)
+        {
+            int RequestID = 0;
+            string Res = null;
+            LogRequest objLog = new LogRequest();
+            objLog.MethodName = "VerifyEmailOrPhone";
+            objLog.Request = JsonConvert.SerializeObject(obj).ToString();
+            objLog.currentUserId = currentUserId;
+            RequestID = RequestLog(objLog);
+            try
+            {
+
+
+
+            }
+
+            catch (SystemException ex)
+            {
+            }
+            return Res;
+
         }
     }
 }
